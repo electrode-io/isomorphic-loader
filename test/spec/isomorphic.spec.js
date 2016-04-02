@@ -109,6 +109,8 @@ describe("isomorphic extend", function () {
     });
 
     it("should fail to load if config doesn't exist", function (done) {
+        delete require.cache[require.resolve("../../lib/extend-require")];
+        extendRequire = require("../../lib/extend-require");
         extendRequire.loadAssets(function (err) {
             expect(err).to.be.ok;
             done();
@@ -176,6 +178,17 @@ describe("isomorphic extend", function () {
         generate(config, function () {
             extendRequire(function () {
                 verifyRequireAssets("");
+                done();
+            });
+        });
+    });
+
+    it("should fail if config version and package version mismatch", function (done) {
+        generate(function () {
+            var config = JSON.parse(fs.readFileSync(Path.resolve(Config.configFile)));
+            config.version = "0.0.1";
+            extendRequire(config, function (err) {
+                expect(err).to.be.ok;
                 done();
             });
         });
