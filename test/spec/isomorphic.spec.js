@@ -43,7 +43,10 @@ describe("isomorphic extend", function () {
             expect(fs.existsSync(Path.resolve(".isomorphic-loader-config.json"))).to.equal(true);
             var expected = {
                 "test/client/images/smiley.jpg": "d04306b61740c68d4f09a015487b3460.jpg",
-                "test/client/images/smiley2.jpg": "d04306b61740c68d4f09a015487b3460.jpg"
+                "test/client/images/smiley2.jpg": "d04306b61740c68d4f09a015487b3460.jpg",
+                "test/client/images/smiley.png": "34c7cd87f32ffa7479a1b5806769d325.png",
+                "test/client/images/smiley.svg": "47869791f9dd9ef1be6e258e1a766ab8.svg",
+                "test/client/data/foo.bin": "71f74d0894d9ce89e22c678f0d8778b2.bin"
             };
             expect(assets).to.deep.equal(expected);
             done();
@@ -56,11 +59,17 @@ describe("isomorphic extend", function () {
         var smiley = require("../client/images/smiley.jpg");
         var smiley2 = require("../client/images/smiley2.jpg");
         var smileyFull = require(Path.resolve("test/client/images/smiley.jpg"));
+        var smileyPng = require("../client/images/smiley.png");
+        var smileySvg = require("../client/images/smiley.svg");
+        var fooBin = require("file!isomorphic!../data/foo.bin");
         var expectedUrl = publicPath + "d04306b61740c68d4f09a015487b3460.jpg";
 
         expect(smiley).to.equal(expectedUrl);
         expect(smiley2).to.equal(expectedUrl);
         expect(smileyFull).to.equal(expectedUrl);
+        expect(smileyPng).to.equal(publicPath + "34c7cd87f32ffa7479a1b5806769d325.png");
+        expect(smileySvg).to.equal(publicPath + "47869791f9dd9ef1be6e258e1a766ab8.svg");
+        expect(fooBin).to.equal(publicPath + "71f74d0894d9ce89e22c678f0d8778b2.bin");
     }
 
     function verifyExtend(callback) {
