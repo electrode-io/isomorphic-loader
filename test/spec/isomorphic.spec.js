@@ -61,7 +61,7 @@ describe("isomorphic extend", function () {
         var smileyFull = require(Path.resolve("test/client/images/smiley.jpg"));
         var smileyPng = require("../client/images/smiley.png");
         var smileySvg = require("../client/images/smiley.svg");
-        var fooBin = require("file!isomorphic!../data/foo.bin");
+        var fooBin = require("file!isomorphic!../client/data/foo.bin");
         var expectedUrl = publicPath + "d04306b61740c68d4f09a015487b3460.jpg";
 
         expect(smiley).to.equal(expectedUrl);
