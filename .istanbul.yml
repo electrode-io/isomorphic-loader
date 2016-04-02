@@ -1,0 +1,17 @@
+instrumentation:
+  root: .
+  extensions:
+    - .js
+  default-excludes: true
+  include-all-sources: true
+check:
+  global:
+    statements: 100
+    lines: 100
+    branches: 100
+    functions: 100
+  each:
+    statements: 100
+    lines: 100
+    branches: 100
+    functions: 100

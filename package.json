@@ -1,0 +1,45 @@
+{
+  "name": "isomorphic-loader",
+  "version": "0.1.0",
+  "description": "Extend Node require so it understands Web asset files like images for SSR",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && mocha test/spec/*.js",
+    "coverage": "istanbul cover _mocha -- test/spec/*.js && istanbul check-coverage",
+    "lint": "eslint *.js lib/*.js test/**/*.js",
+    "prepublish": "npm run coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jchip/isomorphic-loader.git"
+  },
+  "keywords": [
+    "webpack",
+    "isomorphic",
+    "loader",
+    "images",
+    "assets",
+    "SSR",
+    "react",
+    "server",
+    "side",
+    "rendering",
+    "node",
+    "nodejs",
+    "require"
+  ],
+  "author": "Joel Chen",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "clone": "^1.0.2",
+    "eslint": "^2.6.0",
+    "file-loader": "^0.8.5",
+    "istanbul": "^0.4.2",
+    "mocha": "^2.4.5",
+    "rimraf": "^2.5.2",
+    "webpack": "^1.12.14"
+  },
+  "readme": "https://github.com/jchip/isomorphic-loader/blob/master/README.md"
+}
