@@ -19,7 +19,13 @@ module.exports = {
     module: {
         loaders: [
             {
+                name: "images",
                 test: /\.(jpe?g|png|gif|svg)$/i,
+                loader: "file!../.."
+            },
+            {
+                name: "fonts",
+                test: /\.(ttf|eot)$/,
                 loader: "file!../.."
             }
         ]

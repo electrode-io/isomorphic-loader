@@ -46,7 +46,8 @@ describe("isomorphic extend", function () {
                 "test/client/images/smiley2.jpg": "d04306b61740c68d4f09a015487b3460.jpg",
                 "test/client/images/smiley.png": "34c7cd87f32ffa7479a1b5806769d325.png",
                 "test/client/images/smiley.svg": "47869791f9dd9ef1be6e258e1a766ab8.svg",
-                "test/client/data/foo.bin": "71f74d0894d9ce89e22c678f0d8778b2.bin"
+                "test/client/data/foo.bin": "71f74d0894d9ce89e22c678f0d8778b2.bin",
+                "test/client/fonts/font.ttf": "1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf"
             };
             expect(assets).to.deep.equal(expected);
             done();
