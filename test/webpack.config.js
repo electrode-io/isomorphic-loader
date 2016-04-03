@@ -14,7 +14,7 @@ module.exports = {
         publicPath: "/test/"
     },
     plugins: [
-        new IsomorphicLoaderPlugin()
+        new IsomorphicLoaderPlugin({webpackDev: {addUrl: false}})
     ],
     module: {
         loaders: [

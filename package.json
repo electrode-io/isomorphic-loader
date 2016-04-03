@@ -39,7 +39,8 @@
     "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "rimraf": "^2.5.2",
-    "webpack": "^1.12.14"
+    "webpack": "^1.12.14",
+    "webpack-dev-server": "^1.14.1"
   },
   "readme": "https://github.com/jchip/isomorphic-loader/blob/master/README.md"
 }
