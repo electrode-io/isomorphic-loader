@@ -135,7 +135,7 @@ new IsomorphicLoaderPlugin({
 });
 ```
 
-With the above config, your assets will be resolved to `http://localhost:8080/<publicPath>/<hash>.jpg`.
+With the above config, your assets will be resolved to `http://localhost:8080/<publicPath>/<hash>.<ext>`.
 
 When [webpack-dev-server] refresh modified files, `extendRequire` will also auto refresh.
 
