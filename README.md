@@ -148,6 +148,16 @@ extendRequire.loadAssets(true, function (err) {
 });
 ```
 
+#### Deactivating extendRequire
+
+If you wish to deactivate `extendRequire` during run time, then you can use the `deactivate` API:
+
+```js
+extendRequire.deactivate();
+```
+
+[Reload assets](#reloading-assets-for-extend-require) to reactivate.
+
 ### Config and Assets Files
 
 The webpack plugin creates a config file in your `CWD` and an assets mapping file in your webpack output directory.
