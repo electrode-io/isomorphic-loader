@@ -32,13 +32,13 @@ It saves a list of your files that you want to be treated as assets and the exte
 
 ### Configuring Webpack
 
-First you need to mark all your asset files that you want extend require to handle.  To do that, simply use the webpack loader `isomorphic-loader` on the files.
+First you need to mark all your asset files that you want `extendRequire` to handle.  To do that, simply use the webpack loader `isomorphic-loader` on the files.
 
 > The webpack loader `isomorphic-loader` is just a simple pass thru loader to mark your files.
 
 You also need to install a plugin to collect and save the list of the files you marked.
 
-For example, in the webpack config, to mark the usual image files to be understood by the extend require:
+For example, in the webpack config, to mark the usual image files to be understood by the `extendRequire`:
 
 ```js
 var IsomorphicLoaderPlugin = require("isomorphic-loader/lib/webpack-plugin");
@@ -103,17 +103,25 @@ If the config file is not found, it will wait until it's generated.  This is so 
 
 #### Reloading Assets for Extend Require
 
-If at any time you wish extend require to reload the assets, you can use the `loadAssets` API.
+If at any time you wish `extendRequire` to reload the assets, you can use the `loadAssets` API.
 
 ```js
 var extendRequire = require("isomorphic-loader/lib/extend-require");
 
-extendRequire.loadAssets(function (err) {
+extendRequire.loadAssets(true, function (err) {
     if (err) {
         console.log(err);
     }
 });
 ```
+
+### webpack-dev-server
+
+[webpack-dev-server] is automatically detected and supported.
+
+The webpack plugin accepts two options for [webpack-dev-server].
+
+  * The URL to the server.  This is default to `http://localhost:8080`.
 
 ### Config and Assets Files
 
@@ -145,6 +153,7 @@ Here is how the generated config file might look like:
   "assetsFile": "dist/isomorphic-assets.json"
 }
 ```
+
 
 ## License
 

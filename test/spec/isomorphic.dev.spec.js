@@ -202,8 +202,9 @@ describe("isomorphic extend with webpack-dev-server", function () {
         });
     });
 
-    it("should start and add webpack dev server URL", function (done) {
+    function testAddUrl(publicPath, done) {
         var wpConfig = clone(webpackConfig);
+        wpConfig.output.publicPath = publicPath;
         wpConfig.plugins = [new IsomorphicLoaderPlugin({webpackDev: {url: "http://localhost:8080", addUrl: true}})];
         test(wpConfig, function () {
             var font = require("../client/fonts/font.ttf");
@@ -216,5 +217,14 @@ describe("isomorphic extend with webpack-dev-server", function () {
                 }, 10);
             });
         });
+    }
+
+    it("should start and add webpack dev server URL", function (done) {
+        testAddUrl("/test/", done);
     });
+
+    it("should start and add webpack dev server URL and /", function (done) {
+        testAddUrl("test/", done);
+    });
+
 });
