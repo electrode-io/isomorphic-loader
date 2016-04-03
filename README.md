@@ -119,9 +119,25 @@ extendRequire.loadAssets(true, function (err) {
 
 [webpack-dev-server] is automatically detected and supported.
 
-The webpack plugin accepts two options for [webpack-dev-server].
+The webpack plugin accepts an object `webpackDev` in the options with two configs for [webpack-dev-server].
 
-  * The URL to the server.  This is default to `http://localhost:8080`.
+  * `webpackDev.url` - The URL to the server.  ***Default:*** `http://localhost:8080`.
+  * `webpackDev.addUrl` - A flag to toggle adding the dev URL to the final asset URL.  ***Default:*** `true`
+
+In example:
+
+```js
+new IsomorphicLoaderPlugin({
+    webpackDev: {
+        url: "http://localhost:8080",
+        addUrl: true
+    }
+});
+```
+
+With the above config, your assets will be resolved to `http://localhost:8080/<publicPath>/<hash>.jpg`.
+
+When [webpack-dev-server] refresh modified files, `extendRequire` will also auto refresh.
 
 ### Config and Assets Files
 
@@ -143,13 +159,16 @@ Here is how the generated config file might look like:
 {
   "version": "0.1.0",
   "context": "client",
-  "debug": false,
-  "devtool": false,
   "output": {
     "path": "dist",
     "filename": "bundle.js",
     "publicPath": "/test/"
   },
+  "webpackDev": {
+    "url": "http://localhost:8080",
+    "addUrl": true
+  },
+  "isWebpackDev": false,
   "assetsFile": "dist/isomorphic-assets.json"
 }
 ```
