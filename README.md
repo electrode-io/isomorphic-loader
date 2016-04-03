@@ -2,6 +2,11 @@
 
 Webpack loader and tools to extend NodeJS `require` so it understands your web asset files such as images when you are doing server side rendering.
 
+It contains three pieces: a webpack loader and plugin, and a library for your NodeJS app.
+
+The webpack loader and plugin are for marking and generating a mapping for your asset files.
+
+The Node library is for extending NodeJS `require` so it understands your asset files by using the mapping.
 
 ## Install
 
@@ -38,7 +43,7 @@ First you need to mark all your asset files that you want `extendRequire` to han
 
 You also need to install a plugin to collect and save the list of the files you marked.
 
-For example, in the webpack config, to mark the usual image files to be understood by the `extendRequire`:
+For example, in the webpack config, to mark the usual image files to be understood by `extendRequire`:
 
 ```js
 var IsomorphicLoaderPlugin = require("isomorphic-loader/lib/webpack-plugin");
