@@ -11,10 +11,10 @@ var rimraf = require("rimraf");
 var Path = require("path");
 var Config = require("../../lib/config");
 var expect = chai.expect;
-var webpackConfig = require("../webpack.config");
 
 var extendRequire = require("../../lib/extend-require");
 var clone = require("clone");
+var webpackConfig = clone(require("../webpack.config"));
 
 describe("isomorphic extend", function () {
     function cleanup() {
@@ -35,7 +35,10 @@ describe("isomorphic extend", function () {
     }
 
     before(cleanup);
-    afterEach(cleanup);
+    afterEach(function () {
+        extendRequire.deactivate();
+        cleanup();
+    });
 
     it("should generate assets file", function (done) {
         generate(function () {
@@ -110,9 +113,7 @@ describe("isomorphic extend", function () {
     });
 
     it("should fail to load if config doesn't exist", function (done) {
-        delete require.cache[require.resolve("../../lib/extend-require")];
-        extendRequire = require("../../lib/extend-require");
-        extendRequire.loadAssets(function (err) {
+        extendRequire.loadAssets(false, function (err) {
             expect(err).to.be.ok;
             done();
         });
