@@ -61,8 +61,6 @@ describe("isomorphic extend with webpack-dev-server", function () {
         }
     };
 
-    this.timeout(500000);
-
     function start(config, devConfig, callback) {
         var compiler = webpack(config);
         webpackDevServer = new WebpackDevServer(compiler, copy({}, devConfig));
@@ -125,9 +123,9 @@ describe("isomorphic extend with webpack-dev-server", function () {
         start(config, devConfig, function () {
             extendRequire(function () {
                 verifyRemoteAssets("1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf", function () {
-                    setTimeout( function () {
+                    setTimeout(function () {
                         verifyFontChange(callback);
-                    }, 25 );
+                    }, 25);
                 });
             });
         });
@@ -135,13 +133,10 @@ describe("isomorphic extend with webpack-dev-server", function () {
 
     function verifyRenameEvent(callback) {
         var found = false;
-        var x = 0;
         var log = console.log;
         console.log = function (txt, event) {
-            x = txt;
             if (txt.indexOf("extend require: unexpected config file watch event") >= 0 && event === "rename") {
                 found = true;
-                x = 1;
             }
         };
 
@@ -192,15 +187,17 @@ describe("isomorphic extend with webpack-dev-server", function () {
         }
 
         fs.writeFile(configFile, "bad", function () {
-            setTimeout( check, 10);
+            setTimeout(check, 10);
         });
     }
 
     it("should start and watch for file change event", function (done) {
         test(clone(webpackConfig), function () {
             verifyRenameEvent(function () {
-                extendRequire.deactivate();
-                stop(done);
+                setTimeout(function () {
+                    extendRequire.deactivate();
+                    stop(done);
+                }, 10);
             });
         });
     });
@@ -211,9 +208,9 @@ describe("isomorphic extend with webpack-dev-server", function () {
         test(wpConfig, function () {
             var font = require("../client/fonts/font.ttf");
             expect(font).to.equal("http://localhost:8080/test/1fb0e331c05a52d5eb847d6fc018320d.ttf");
-            verifyBadConfig( function () {
+            verifyBadConfig(function () {
                 fs.unlinkSync(configFile);
-                setTimeout(function() {
+                setTimeout(function () {
                     extendRequire.deactivate();
                     stop(done);
                 }, 10);
