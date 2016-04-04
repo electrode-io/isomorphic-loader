@@ -187,9 +187,7 @@ describe("isomorphic extend", function () {
 
     it("should fail if config version and package version mismatch", function (done) {
         generate(function () {
-            var config = JSON.parse(fs.readFileSync(Path.resolve(Config.configFile)));
-            config.version = "0.0.1";
-            extendRequire(config, function (err) {
+            extendRequire({version: "0.0.1"}, function (err) {
                 expect(err).to.be.ok;
                 done();
             });

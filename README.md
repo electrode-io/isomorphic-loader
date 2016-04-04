@@ -141,7 +141,7 @@ It's not necessary, but if at any time you wish `extendRequire` to reload the as
 ```js
 var extendRequire = require("isomorphic-loader/lib/extend-require");
 
-extendRequire.loadAssets(true, function (err) {
+extendRequire.loadAssets(function (err) {
     if (err) {
         console.log(err);
     }
