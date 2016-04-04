@@ -17,7 +17,7 @@ var expect = chai.expect;
 var extendRequire = require("../../lib/extend-require");
 var clone = require("clone");
 var WebpackDevServer = require("webpack-dev-server");
-var copy = require("../../lib/copy");
+var deepExtend = require("deep-extend");
 var fetchUrl = require("fetch").fetchUrl;
 
 var webpackConfig = clone(require("../webpack.config"));
@@ -63,7 +63,7 @@ describe("isomorphic extend with webpack-dev-server", function () {
 
     function start(config, devConfig, callback) {
         var compiler = webpack(config);
-        webpackDevServer = new WebpackDevServer(compiler, copy({}, devConfig));
+        webpackDevServer = new WebpackDevServer(compiler, deepExtend({}, devConfig));
         webpackDevServer.listen(8080, "localhost", function () {
             callback();
         });

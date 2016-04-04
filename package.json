@@ -30,7 +30,9 @@
   ],
   "author": "Joel Chen",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "deep-extend": "^0.4.1"
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "clone": "^1.0.2",
