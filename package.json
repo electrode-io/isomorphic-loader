@@ -1,6 +1,6 @@
 {
   "name": "isomorphic-loader",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Make Node require understands files like images for SSR",
   "main": "index.js",
   "scripts": {
