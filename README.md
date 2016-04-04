@@ -208,6 +208,16 @@ Here is how the generated config file might look like:
 
 Since [webpack-dev-server] keeps output in memory, the assets mapping is saved to the config also when it's detected.
 
+## Usage with CDN Server
+
+If you publish your assets to a Content Delivery Network server, and if it generates a new unique path for your assets, then you likely have to set `publicPath` after webpack compiled your project.
+
+That's why [webpack]'s document has this note in the [section about `publicPath`]:
+
+> Note: In cases when the eventual publicPath of output files isn't known at compile time, it can be left blank and set dynamically at runtime in the entry point file. If you don't know the publicPath while compiling you can omit it and set __webpack_public_path__ on your entry point.
+
+In that case, you would have to save the path CDN created for you and pass it to `extendRequire` with a [custom config override](#custom-config-overrides).
+
 ## License
 
 [MIT License]
@@ -217,4 +227,4 @@ Since [webpack-dev-server] keeps output in memory, the assets mapping is saved t
 [MIT License]: http://www.opensource.org/licenses/mit-license.php
 [webpack-dev-server]: https://webpack.github.io/docs/webpack-dev-server.html
 [webpack]: https://webpack.github.io/
-
+[section about `publicPath`]: https://github.com/webpack/docs/wiki/configuration#outputpublicpath
