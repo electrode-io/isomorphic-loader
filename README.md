@@ -1,6 +1,6 @@
 # Webpack Isomorphic Loader
 
-Webpack loader and tools to extend NodeJS `require` so it understands your web asset files such as images when you are doing server side rendering (SSR).
+Webpack loader and tools to make NodeJS `require` understands files such as images when you are doing server side rendering (SSR).
 
 It contains three pieces: a webpack loader and plugin, and a library for your NodeJS app.
 
@@ -29,7 +29,7 @@ render() {
 
 That works out nicely, but if you need to do SSR, you will get SyntaxError from Node `require`.  That's because `require` only understand JS files.
 
-With this module, you can extend Node's `require` so it will understand these files.
+With this module, you can extend Node's `require` so it understands these files.
 
 It saves a list of your files that you want to be treated as assets and the extended `require` will return the URL string like it would on the client side.
 
@@ -110,7 +110,7 @@ If the config file is not found, then it will wait until it's generated.  This i
 
 [webpack-dev-server] is automatically detected and supported.
 
-> There is no easy way to detect [webpack-dev-server], but if you use its CLI, then it changes `output.path` to `"/"`.  Since it's unlikely anyone would do that, when that is the case it's assumed [webpack-dev-server] is running.
+> There is no easy way to detect [webpack-dev-server], but if you use its CLI, then it changes `output.path` to `"/"`.  Since it's unlikely anyone would do that, when that is the case it's assumed that [webpack-dev-server] is running.
 
 The webpack plugin accepts an object `webpackDev` in the options with two configs for [webpack-dev-server].
 
@@ -128,7 +128,7 @@ new IsomorphicLoaderPlugin({
 });
 ```
 
-With the above config, your assets will be resolved to `http://localhost:8080/<publicPath>/<hash>.<ext>`.
+With the above config, your assets will be resolved to `http://localhost:8080/<publicPath>/<hash>.<ext>` when loaded with `require`.
 
 > They are resolved to `<publicPath>/<hash>.<ext>` if `webpackDev.addUrl` is `false`.
 
@@ -192,7 +192,7 @@ Here is how the generated config file might look like:
 }
 ```
 
-Since [webpack-dev-server] keep output in memory, the assets mapping is saved to the config also when it's detected.
+Since [webpack-dev-server] keeps output in memory, the assets mapping is saved to the config also when it's detected.
 
 ## License
 
