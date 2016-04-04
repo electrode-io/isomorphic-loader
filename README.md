@@ -106,6 +106,20 @@ It will use the config file `.isomorphic-loader-config.json` in your `CWD` gener
 
 If the config file is not found, then it will wait until it's generated.  This is so you can use [webpack-dev-server].
 
+#### Custom Config Overrides
+
+You can pass in custom overrides for the config when you call `extendRequire`.
+
+For example, if you want to always use a different `publicPath`:
+
+```js
+extendRequire({output: { publicPath: "http://cdn.com/" } }).then(function () {
+    require("./server");
+}).catch(function (err) {
+    console.log(err);
+});
+```
+
 ### webpack-dev-server
 
 [webpack-dev-server] is automatically detected and supported.
