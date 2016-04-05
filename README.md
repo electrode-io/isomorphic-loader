@@ -214,11 +214,12 @@ If you publish your assets to a Content Delivery Network server, and if it gener
 
 That's why [webpack]'s document has this note in the [section about `publicPath`]:
 
-> Note: In cases when the eventual publicPath of output files isn't known at compile time, it can be left blank and set dynamically at runtime in the entry point file. If you don't know the publicPath while compiling you can omit it and set __webpack_public_path__ on your entry point.
+> **Note:** In cases when the eventual `publicPath` of output files isn't known at compile time, it can be left blank and set dynamically at runtime in the entry point file.
+  If you don't know the `publicPath` while compiling you can omit it and set `__webpack_public_path__` on your entry point.
 
-In that case, you would have to save the path CDN created for you and pass it to `extendRequire` with a [custom config override](#custom-config-overrides).
+In that case, you would have to save the path CDN created for you and pass it to `extendRequire` with a [custom config override](#custom-config-overrides), or you can just modify the [config file](#config-and-assets-files) directly.
 
-If your CDN server generates a unique URL for every asset file instead of a single base path, then you have to do some custom post processing to update the asset mapping files yourself.
+If your CDN server generates an unique URL for every asset file instead of a single base path, then you have to do some custom post processing to update the asset mapping files yourself.
 
 ## License
 
