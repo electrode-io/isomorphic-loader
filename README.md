@@ -218,6 +218,8 @@ That's why [webpack]'s document has this note in the [section about `publicPath`
 
 In that case, you would have to save the path CDN created for you and pass it to `extendRequire` with a [custom config override](#custom-config-overrides).
 
+If your CDN server generates a unique URL for every asset file instead of a single base path, then you have to do some custom post processing to update the asset mapping files yourself.
+
 ## License
 
 [MIT License]
