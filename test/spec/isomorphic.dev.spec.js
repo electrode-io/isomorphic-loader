@@ -28,6 +28,8 @@ webpackConfig.output.path = "/";
 
 describe("isomorphic extend with webpack-dev-server", function () {
 
+    Config.initialWaitingNoticeDelay = 0;
+
     var configFile = Path.resolve(Config.configFile);
 
     function writeFont(data) {
@@ -191,6 +193,32 @@ describe("isomorphic extend with webpack-dev-server", function () {
         });
     }
 
+    function verifySkipReload(callback) {
+        var log = console.log;
+        var found = false;
+
+        console.log = function (txt) {
+            if (txt.indexOf("extend require: skip reload. timestamp did not change") >= 0) {
+                found = true;
+                console.log = log;
+            }
+        };
+
+        function check() {
+            if (found) {
+                callback();
+            } else {
+                setTimeout(check, 10);
+            }
+        }
+
+        var isoConfig = JSON.parse(fs.readFileSync(configFile));
+        isoConfig.timestamp -= 10000;
+        fs.writeFileSync(configFile, JSON.stringify(isoConfig, null, 2));
+        check();
+    }
+
+
     it("should start and watch for file change event", function (done) {
         test(clone(webpackConfig), function () {
             verifyRenameEvent(function () {
@@ -209,13 +237,17 @@ describe("isomorphic extend with webpack-dev-server", function () {
         test(wpConfig, function () {
             var font = require("../client/fonts/font.ttf");
             expect(font).to.equal("http://localhost:8080/test/1fb0e331c05a52d5eb847d6fc018320d.ttf");
-            verifyBadConfig(function () {
-                fs.unlinkSync(configFile);
-                setTimeout(function () {
-                    extendRequire.deactivate();
-                    stop(done);
-                }, 10);
-            });
+            setTimeout( function () {
+                verifySkipReload(function () {
+                    verifyBadConfig(function () {
+                        fs.unlinkSync(configFile);
+                        setTimeout(function () {
+                            extendRequire.deactivate();
+                            stop(done);
+                        }, 10);
+                    });
+                });
+            }, 50 );
         });
     }
 
@@ -226,5 +258,4 @@ describe("isomorphic extend with webpack-dev-server", function () {
     it("should start and add webpack dev server URL and /", function (done) {
         testAddUrl("test/", done);
     });
-
 });

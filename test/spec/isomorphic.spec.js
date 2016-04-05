@@ -16,10 +16,12 @@ var extendRequire = require("../../lib/extend-require");
 var clone = require("clone");
 var webpackConfig = clone(require("../webpack.config"));
 
+var configFile = Path.resolve(Config.configFile);
+
 describe("isomorphic extend", function () {
     function cleanup() {
         rimraf.sync(Path.resolve("test/dist"));
-        rimraf.sync(Path.resolve(Config.configFile));
+        rimraf.sync(configFile);
     }
 
     function generate(config, callback) {
@@ -146,7 +148,7 @@ describe("isomorphic extend", function () {
             return;
         }
 
-        fs.writeFileSync(Path.resolve(Config.configFile), "bad");
+        fs.writeFileSync(configFile, "bad");
         return extendRequire()
             .then(function () {
                 chai.assert(false, "expected error");
@@ -156,7 +158,7 @@ describe("isomorphic extend", function () {
     });
 
     it("should fail to extend if config file is invalid (callback)", function (done) {
-        fs.writeFileSync(Path.resolve(Config.configFile), "bad");
+        fs.writeFileSync(configFile, "bad");
         extendRequire(function (err) {
             expect(err).to.be.ok;
             done();
