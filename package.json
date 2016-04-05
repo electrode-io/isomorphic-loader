@@ -1,7 +1,7 @@
 {
   "name": "isomorphic-loader",
   "version": "1.1.1",
-  "description": "Make Node require understands files like images for SSR",
+  "description": "Webpack isomorphic loader tools to make Node require handle files like images for Server Side Rendering (SSR)",
   "main": "index.js",
   "scripts": {
     "test": "npm run lint && mocha test/spec/*.js",
