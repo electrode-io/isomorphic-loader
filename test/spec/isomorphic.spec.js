@@ -76,6 +76,13 @@ describe("isomorphic extend", function () {
         expect(smileyPng).to.equal(publicPath + "f958aee9742689b14418e8efef2b4032.png");
         expect(smileySvg).to.equal(publicPath + "47869791f9dd9ef1be6e258e1a766ab8.svg");
         expect(fooBin).to.equal(publicPath + "71f74d0894d9ce89e22c678f0d8778b2.bin");
+
+        try {
+            require("bad_module");
+            chai.assert(false, "expect exception");
+        } catch (e) {
+            expect(e).to.be.ok;
+        }
     }
 
     function verifyExtend(callback) {
