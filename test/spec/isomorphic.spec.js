@@ -122,7 +122,7 @@ describe("isomorphic extend", function () {
     });
 
     it("should fail to load if config doesn't exist", function (done) {
-        extendRequire.loadAssets(false, function (err) {
+        extendRequire.loadAssets(function (err) {
             expect(err).to.be.ok;
             done();
         });
