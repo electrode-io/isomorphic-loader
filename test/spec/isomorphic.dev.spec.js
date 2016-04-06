@@ -91,7 +91,7 @@ describe("isomorphic extend with webpack-dev-server", function () {
         fetchUrl("http://localhost:8080/test/isomorphic-assets.json", function (err, meta, body) {
             expect(meta.status).to.equal(200);
             var assets = JSON.parse(body.toString());
-            expect(assets["test/client/fonts/font.ttf"]).to.equal(fontHash);
+            expect(assets.marked["test/client/fonts/font.ttf"]).to.equal(fontHash);
 
             callback();
         });
