@@ -207,4 +207,13 @@ describe("isomorphic extend", function () {
             });
         });
     });
+
+    it("plugin should remove existing config base on option flag", function () {
+        var Plugin = require("../../lib/webpack-plugin");
+        fs.writeFileSync(configFile, "{}");
+        new Plugin({keepExistingConfig: true});
+        expect(fs.existsSync(configFile)).to.be.true;
+        new Plugin({});
+        expect(fs.existsSync(configFile)).to.be.false;
+    });
 });
