@@ -91,14 +91,14 @@ describe("isomorphic extend", function () {
     }
 
     function verifyExtend(callback) {
-        extendRequire(function () {
+        extendRequire({startDelay: 0}, function () {
             verifyRequireAssets();
             callback();
         });
     }
 
     function verifyExtendPromise(callback) {
-        extendRequire().then(verifyRequireAssets).then(callback);
+        extendRequire({startDelay: 0}).then(verifyRequireAssets).then(callback);
     }
 
     it("should extend require", function (done) {
@@ -161,7 +161,7 @@ describe("isomorphic extend", function () {
         }
 
         fs.writeFileSync(configFile, "bad");
-        return extendRequire()
+        return extendRequire({startDelay: 0})
             .then(function () {
                 chai.assert(false, "expected error");
             }, function (err) {
@@ -171,7 +171,7 @@ describe("isomorphic extend", function () {
 
     it("should fail to extend if config file is invalid (callback)", function (done) {
         fs.writeFileSync(configFile, "bad");
-        extendRequire(function (err) {
+        extendRequire({startDelay: 1}, function (err) {
             expect(err).to.be.ok;
             done();
         });
@@ -181,7 +181,7 @@ describe("isomorphic extend", function () {
         var config = clone(webpackConfig);
         delete config.output.publicPath;
         generate(config, function () {
-            extendRequire(function () {
+            extendRequire({startDelay: 2}, function () {
                 verifyRequireAssets("");
                 done();
             });
@@ -192,7 +192,7 @@ describe("isomorphic extend", function () {
         var config = clone(webpackConfig);
         config.output.publicPath = "";
         generate(config, function () {
-            extendRequire(function () {
+            extendRequire({startDelay: 1}, function () {
                 verifyRequireAssets("");
                 done();
             });
@@ -201,7 +201,7 @@ describe("isomorphic extend", function () {
 
     it("should fail if config version and package version mismatch", function (done) {
         generate(function () {
-            extendRequire({version: "0.0.1"}, function (err) {
+            extendRequire({startDelay: 0, version: "0.0.1"}, function (err) {
                 expect(err).to.be.ok;
                 done();
             });
