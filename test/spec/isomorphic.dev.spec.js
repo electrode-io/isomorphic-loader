@@ -230,14 +230,18 @@ describe("isomorphic extend with webpack-dev-server", function () {
         });
     });
 
-    function testAddUrl(publicPath, done) {
+    function testAddUrl(publicPath, skipSetEnv, done) {
         var wpConfig = clone(webpackConfig);
         wpConfig.output.publicPath = publicPath;
-        wpConfig.plugins = [new IsomorphicLoaderPlugin({webpackDev: {url: "http://localhost:8080", addUrl: true}})];
+        wpConfig.plugins = [new IsomorphicLoaderPlugin({
+            webpackDev: {url: "http://localhost:8080", addUrl: true, skipSetEnv: skipSetEnv}
+        })];
         test(wpConfig, function () {
             var font = require("../client/fonts/font.ttf");
             expect(font).to.equal("http://localhost:8080/test/1fb0e331c05a52d5eb847d6fc018320d.ttf");
-            setTimeout( function () {
+            var env = skipSetEnv ? (!!process.env.WEBPACK_DEV).toString() : process.env.WEBPACK_DEV;
+            expect(env).to.equal((!skipSetEnv).toString());
+            setTimeout(function () {
                 verifySkipReload(function () {
                     verifyBadConfig(function () {
                         fs.unlinkSync(configFile);
@@ -247,15 +251,17 @@ describe("isomorphic extend with webpack-dev-server", function () {
                         }, 10);
                     });
                 });
-            }, 50 );
+            }, 50);
         });
     }
 
     it("should start and add webpack dev server URL", function (done) {
-        testAddUrl("/test/", done);
+        delete process.env.WEBPACK_DEV;
+        testAddUrl("/test/", true, done);
     });
 
     it("should start and add webpack dev server URL and /", function (done) {
-        testAddUrl("test/", done);
+        delete process.env.WEBPACK_DEV;
+        testAddUrl("test/", false, done);
     });
 });
