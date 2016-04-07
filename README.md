@@ -172,6 +172,19 @@ extendRequire.deactivate();
 
 [Reload assets](#reloading-assets-for-extend-require) to reactivate.
 
+
+#### `process.env.WEBPACK_DEV`
+
+If `extendRequire` detected that [webpack-dev-server] is running, it will set `process.env.WEBPACK_DEV` to `"true"` before returning to your server startup code.  If you don't want that, set `webpackDev.skipSetEnv` to `true` in the plugin options:
+
+```js
+module.exports = {
+    plugins: [
+        new IsomorphicLoaderPlugin({ webpackDev: { skipSetEnv: true } })
+    ]
+}
+```
+
 ### Config and Assets Files
 
 The webpack plugin creates a config file in your `CWD` and an assets mapping file in your webpack output directory.
