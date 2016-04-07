@@ -68,7 +68,7 @@ describe("isomorphic extend", function () {
         }
 
         generate(function () {
-            setTimeout(verify, 1);
+            setTimeout(verify, 10);
         });
     });
 
@@ -232,7 +232,7 @@ describe("isomorphic extend", function () {
             fs.writeFileSync(lockFile, "lock");
             setTimeout(function () {
                 fs.unlinkSync(lockFile);
-            }, 10);
+            }, 18);
 
             extendRequire(function (err) {
                 expect(err).not.to.be.ok;
@@ -243,7 +243,7 @@ describe("isomorphic extend", function () {
 
         generate(function (err) {
             expect(err).not.to.be.ok;
-            setTimeout(verify, 1);
+            setTimeout(verify, 10);
         });
     });
 
@@ -262,7 +262,7 @@ describe("isomorphic extend", function () {
             saveConfig(false);
             setTimeout(function () {
                 saveConfig(true);
-            }, 15);
+            }, 18);
 
             var begin = Date.now();
             extendRequire(function (err) {
@@ -274,7 +274,7 @@ describe("isomorphic extend", function () {
 
         generate(function (err) {
             expect(err).not.to.be.ok;
-            setTimeout(verify, 1);
+            setTimeout(verify, 10);
         });
     });
 });
