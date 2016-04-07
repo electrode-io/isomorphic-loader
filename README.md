@@ -208,6 +208,18 @@ Here is how the generated config file might look like:
 
 Since [webpack-dev-server] keeps output in memory, the assets mapping is saved to the config also when it's detected.
 
+#### Auto Removing Config
+
+To avoid immediately starting in webpack-dev-server mode when a config file already exist.  The webpack plugin automatically remove the config file at startup.  If you don't want it to do that, pass in an option `keepExistingConfig` as true:
+
+```js
+module.exports = {
+    plugins: [
+        new IsomorphicLoaderPlugin({ keepExistingConfig: true })
+    ]
+}
+```
+
 ## Usage with CDN Server
 
 If you publish your assets to a Content Delivery Network server, and if it generates a new unique path for your assets, then you likely have to set `publicPath` after webpack compiled your project.
