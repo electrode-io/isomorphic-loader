@@ -17,6 +17,9 @@ var clone = require("clone");
 var webpackConfig = clone(require("../webpack.config"));
 
 var configFile = Path.resolve(Config.configFile);
+var lockFile = Path.resolve(Config.lockFile);
+
+Config.defaultStartDelay = 0;
 
 describe("isomorphic extend", function () {
     function cleanup() {
@@ -43,9 +46,10 @@ describe("isomorphic extend", function () {
     });
 
     it("should generate assets file", function (done) {
-        generate(function () {
-            var assets = JSON.parse(fs.readFileSync(Path.resolve("test/dist/isomorphic-assets.json")));
-            expect(fs.existsSync(Path.resolve(".isomorphic-loader-config.json"))).to.equal(true);
+        function verify() {
+            chai.assert(fs.existsSync(configFile), "config file doesn't exist");
+            var config = JSON.parse(fs.readFileSync(configFile));
+            var assets = JSON.parse(fs.readFileSync(Path.resolve(config.assetsFile)));
             var expected = {
                 chunks: {
                     main: "bundle.js"
@@ -61,6 +65,10 @@ describe("isomorphic extend", function () {
             };
             expect(assets).to.deep.equal(expected);
             done();
+        }
+
+        generate(function () {
+            setTimeout(verify, 1);
         });
     });
 
@@ -215,5 +223,58 @@ describe("isomorphic extend", function () {
         expect(fs.existsSync(configFile)).to.be.true;
         new Plugin({}); // eslint-disable-line
         expect(fs.existsSync(configFile)).to.be.false;
+    });
+
+    it("should check lock file", function (done) {
+        Config.lockFilePollInterval = 20;
+        function verify() {
+            var begin = Date.now();
+            fs.writeFileSync(lockFile, "lock");
+            setTimeout(function () {
+                fs.unlinkSync(lockFile);
+            }, 10);
+
+            extendRequire(function (err) {
+                expect(err).not.to.be.ok;
+                expect(Date.now() - begin).to.be.above(20);
+                done();
+            });
+        }
+
+        generate(function (err) {
+            expect(err).not.to.be.ok;
+            setTimeout(verify, 1);
+        });
+    });
+
+    it("should wait for valid config if file watcher is not setup yet", function (done) {
+        Config.validPollInterval = 20;
+        function verify() {
+            var config = JSON.parse(fs.readFileSync(configFile));
+
+            function saveConfig(valid) {
+                config.valid = valid;
+                config.isWebpackDev = true;
+                config.assets = {marked: {}};
+                fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
+            }
+
+            saveConfig(false);
+            setTimeout(function () {
+                saveConfig(true);
+            }, 15);
+
+            var begin = Date.now();
+            extendRequire(function (err) {
+                expect(err).not.to.be.ok;
+                expect(Date.now() - begin).to.be.above(20);
+                done();
+            });
+        }
+
+        generate(function (err) {
+            expect(err).not.to.be.ok;
+            setTimeout(verify, 1);
+        });
     });
 });
