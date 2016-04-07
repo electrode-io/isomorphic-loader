@@ -211,9 +211,9 @@ describe("isomorphic extend", function () {
     it("plugin should remove existing config base on option flag", function () {
         var Plugin = require("../../lib/webpack-plugin");
         fs.writeFileSync(configFile, "{}");
-        new Plugin({keepExistingConfig: true});
+        new Plugin({keepExistingConfig: true}); // eslint-disable-line
         expect(fs.existsSync(configFile)).to.be.true;
-        new Plugin({});
+        new Plugin({}); // eslint-disable-line
         expect(fs.existsSync(configFile)).to.be.false;
     });
 });
