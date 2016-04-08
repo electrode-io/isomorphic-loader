@@ -256,6 +256,7 @@ describe("isomorphic extend", function () {
                 config.valid = valid;
                 config.isWebpackDev = true;
                 config.assets = {marked: {}};
+                config.webpackDev = {};
                 fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
             }
 
