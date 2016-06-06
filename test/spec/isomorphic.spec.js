@@ -96,6 +96,13 @@ describe("isomorphic extend", function () {
         } catch (e) {
             expect(e).to.be.ok;
         }
+
+        try {
+            require("../client/images/smiley");
+            chai.assert(false, "expect exception");
+        } catch (e) {
+            expect(e).to.be.ok;
+        }
     }
 
     function verifyExtend(callback) {
