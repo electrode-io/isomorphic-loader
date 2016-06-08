@@ -237,7 +237,7 @@ module.exports = {
 
 Even with the plugin removing the config file, if you take the approach of starting your sever and [webpack-dev-server] together, then there's a high chance your server could start before the webpack plugin has a chance to remove the config file.
 
-To avoid that, `extendRequire` automatically delays a short time (300ms) before starting.
+To avoid that, `extendRequire` automatically delays a short time (500ms) before starting.
 
 You can configure that value when you call `extendRequire`.  For example, set it to zero to start immediately.
 
