@@ -130,6 +130,15 @@ describe("isomorphic extend", function () {
         }, Config.pollConfigInterval + 1);
     });
 
+    it("should timeout if wait over waitConfigTimeout", function (done) {
+        Config.initialWaitingNoticeDelay = 50;
+        Config.waitConfigTimeout = 100;
+        extendRequire({startDelay: 0}, function (err) {
+            expect(err.message).to.equal("isomorphic-loader config not found");
+            done();
+        });
+    });
+
     it("should support Promise", function (done) {
         if (typeof Promise !== "undefined") {
             generate(function () {
