@@ -223,6 +223,23 @@ describe("isomorphic extend", function () {
         });
     });
 
+    it("should call processAssets", function (done) {
+        var config = clone(webpackConfig);
+        generate(config, function () {
+            var processed = false;
+            extendRequire({
+                startDelay: 1,
+                processAssets: function (a) {
+                    processed = !!a;
+                    return a;
+                }
+            }, function () {
+                expect(processed).to.be.true;
+                done();
+            });
+        });
+    });
+
     it("should fail if config version and package version mismatch", function (done) {
         generate(function () {
             extendRequire({startDelay: 0, version: "0.0.1"}, function (err) {
