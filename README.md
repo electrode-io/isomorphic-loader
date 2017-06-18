@@ -1,3 +1,6 @@
+[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url]
+[![Dependency Status][daviddm-image]][daviddm-url] [![devDependency Status][daviddm-dev-image]][daviddm-dev-url]
+
 # Webpack Isomorphic Loader
 
 Webpack loader and tools to make NodeJS `require` understands files such as images when you are doing server side rendering (SSR).
@@ -283,3 +286,19 @@ If your CDN server generates an unique URL for every asset file instead of a sin
 [webpack-dev-server]: https://webpack.github.io/docs/webpack-dev-server.html
 [webpack]: https://webpack.github.io/
 [section about `publicPath`]: https://github.com/webpack/docs/wiki/configuration#outputpublicpath
+
+[travis-image]: https://travis-ci.org/electrode-io/isomorphic-loader.svg?branch=master
+
+[travis-url]: https://travis-ci.org/electrode-io/isomorphic-loader
+
+[npm-image]: https://badge.fury.io/js/isomorphic-loader.svg
+
+[npm-url]: https://npmjs.org/package/isomorphic-loader
+
+[daviddm-image]: https://david-dm.org/electrode-io/isomorphic-loader/status.svg
+
+[daviddm-url]: https://david-dm.org/electrode-io/isomorphic-loader
+
+[daviddm-dev-image]: https://david-dm.org/electrode-io/isomorphic-loader/dev-status.svg
+
+[daviddm-dev-url]: https://david-dm.org/electrode-io/isomorphic-loader?type=dev

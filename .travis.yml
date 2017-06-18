@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - v4
+  - v6
+  - v8
+script: npm run coverage
+notifications:
+  email:
+    - joel123@gmail.com
