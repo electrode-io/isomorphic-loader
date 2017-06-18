@@ -240,6 +240,11 @@ describe("isomorphic extend", function () {
         });
     });
 
+    it("setAssets should handle non-object", function () {
+        extendRequire._instance.setAssets(null);
+        expect(extendRequire._instance.assetsCount).to.equal(0);
+    });
+
     it("should fail if config version and package version mismatch", function (done) {
         generate(function () {
             extendRequire({startDelay: 0, version: "0.0.1"}, function (err) {
