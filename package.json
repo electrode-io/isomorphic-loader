@@ -7,7 +7,7 @@
     "wp": "webpack --config test/webpack.config.js",
     "wpd": "webpack-dev-server --config test/webpack.config.js",
     "test": "npm run lint && mocha test/spec/*.js",
-    "coverage": "istanbul cover _mocha -- test/spec/*.js && istanbul check-coverage",
+    "coverage": "nyc --all --reporter=lcov --reporter=text --reporter=text-summary npm test",
     "lint": "eslint *.js lib/*.js test/**/*.js",
     "prepublish": "npm run lint && npm run coverage"
   },
@@ -41,11 +41,26 @@
     "eslint": "^2.6.0",
     "fetch": "^1.0.1",
     "file-loader": "^0.8.5",
-    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
+    "nyc": "^11.0.2",
     "rimraf": "^2.5.2",
     "webpack": "^1.12.14",
     "webpack-dev-server": "^1.14.1"
+  },
+  "nyc": {
+    "check-coverage": true,
+    "lines": 100,
+    "statements": 100,
+    "functions": 100,
+    "branches": 100,
+    "cache": true,
+    "all": true,
+    "exclude": [
+      "cli",
+      "xclap.js",
+      "test",
+      "coverage"
+    ]
   },
   "readme": "https://github.com/jchip/isomorphic-loader/blob/master/README.md"
 }
