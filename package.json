@@ -61,6 +61,5 @@
       "test",
       "coverage"
     ]
-  },
-  "readme": "https://github.com/jchip/isomorphic-loader/blob/master/README.md"
+  }
 }
