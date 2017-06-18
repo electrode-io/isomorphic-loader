@@ -94,3 +94,4 @@ _book
 
 test/dist
 .isomorphic-loader-config*
+.nyc_output
