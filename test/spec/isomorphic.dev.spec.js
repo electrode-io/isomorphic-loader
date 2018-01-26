@@ -28,6 +28,7 @@ var logger = require("../../lib/logger");
 webpackConfig.output.path = "/";
 
 describe("isomorphic extend with webpack-dev-server", function() {
+  this.timeout(4000);
   Config.initialWaitingNoticeDelay = 0;
 
   var configFile = Path.resolve(Config.configFile);
