@@ -4,7 +4,7 @@
  * MIT License http://www.opensource.org/licenses/mit-license.php
  */
 
-/* eslint-disable */
+/* eslint-disable max-nested-callbacks */
 
 var chai = require("chai");
 var webpack = require("webpack");
@@ -23,6 +23,8 @@ var fetchUrl = require("fetch").fetchUrl;
 var webpackConfig = clone(require("../webpack.config"));
 var IsomorphicLoaderPlugin = require("../../lib/webpack-plugin");
 
+var logger = require("../../lib/logger");
+
 webpackConfig.output.path = "/";
 
 describe("isomorphic extend with webpack-dev-server", function() {
@@ -40,6 +42,15 @@ describe("isomorphic extend with webpack-dev-server", function() {
   }
 
   var webpackDevServer;
+
+  function start(config, devConfig, callback) {
+    var compiler = webpack(config);
+    webpackDevServer = new WebpackDevServer(compiler, deepExtend({}, devConfig));
+    webpackDevServer.listen(8080, "localhost", function() {
+      callback();
+    });
+  }
+
   var devConfig = {
     host: "localhost",
     port: 8080,
@@ -61,14 +72,6 @@ describe("isomorphic extend with webpack-dev-server", function() {
     }
   };
 
-  function start(config, devConfig, callback) {
-    var compiler = webpack(config);
-    webpackDevServer = new WebpackDevServer(compiler, deepExtend({}, devConfig));
-    webpackDevServer.listen(8080, "localhost", function() {
-      callback();
-    });
-  }
-
   function stop(callback) {
     if (webpackDevServer) {
       webpackDevServer.close();
@@ -80,9 +83,22 @@ describe("isomorphic extend with webpack-dev-server", function() {
   }
 
   before(cleanup);
+
+  var origLog = logger.log;
+  var logs = [];
+  beforeEach(function() {
+    Config.verbose = true;
+    Config.reloadDelay = 10;
+    logs = [];
+    logger.log = function() {
+      logs.push(Array.prototype.slice.apply(arguments).join(" "));
+    };
+  });
+
   afterEach(function() {
     extendRequire.deactivate();
     cleanup();
+    logger.log = origLog;
   });
 
   function verifyRemoteAssets(fontHash, callback) {
@@ -90,33 +106,28 @@ describe("isomorphic extend with webpack-dev-server", function() {
       expect(meta.status).to.equal(200);
       var assets = JSON.parse(body.toString());
       expect(assets.marked["test/client/fonts/font.ttf"]).to.equal(fontHash);
-
       callback();
     });
   }
 
   function verifyFontChange(callback) {
-    var log = console.log,
-      found;
-
     writeFont("testtesttest");
 
     function check() {
-      if (!found) {
-        setTimeout(check, 10);
+      if (
+        !logs.find(function(x) {
+          // console.log("checking", x);
+          return x.indexOf("config is now VALID") >= 0;
+        })
+      ) {
+        setTimeout(check, 500);
       } else {
+        // console.log("found");
         verifyRemoteAssets("1fb0e331c05a52d5eb847d6fc018320d.ttf", callback);
       }
     }
 
-    console.log = function(txt) {
-      if (txt.indexOf("extend require: config refreshed") >= 0) {
-        found = true;
-        console.log = log;
-      }
-    };
-
-    setTimeout(check, 10);
+    setTimeout(check, 500);
   }
 
   function test(config, callback) {
@@ -132,56 +143,33 @@ describe("isomorphic extend with webpack-dev-server", function() {
   }
 
   function verifyRenameEvent(callback) {
-    var found = false;
-    var log = console.log;
-    console.log = function(txt, event) {
-      if (
-        txt.indexOf("extend require: unexpected config file watch event") >= 0 &&
-        event === "rename"
-      ) {
-        found = true;
-      }
-    };
-
     var newName = Path.resolve(".iso-config.json");
-    var check;
+    var renames = [{ src: configFile, dst: newName }, { src: newName, dst: configFile }];
 
-    var verified = function() {
-      found = false;
-      verified = function() {
-        console.log = log;
-        callback();
-      };
-      fs.rename(newName, configFile, function(err) {
+    var check = function() {
+      var found = logs.find(function(x) {
+        return x.indexOf("unexpected config file watch event rename") > 0;
+      });
+      var x = renames.shift();
+      if (!x) {
+        expect(found).to.be.a.string;
+        return callback();
+      }
+      fs.rename(x.src, x.dst, function(err) {
         expect(err).to.equal(null);
         setTimeout(check, 10);
       });
     };
 
-    check = function() {
-      if (found) {
-        verified();
-      } else {
-        setTimeout(check, 10);
-      }
-    };
-
-    fs.rename(configFile, newName, function(err) {
-      expect(err).to.equal(null);
-      setTimeout(check, 10);
-    });
+    check();
   }
 
   function verifyBadConfig(callback) {
-    var log = console.log;
-    var found = false;
-    console.log = function(txt) {
-      if (txt.indexOf("extend require: file watcher load assets error") >= 0) {
-        found = true;
-        console.log = log;
-      }
-    };
     function check() {
+      var found = logs.find(function(x) {
+        return x.indexOf("extend require: file watcher load assets error") >= 0;
+      });
+      logs = [];
       if (found) {
         callback();
       } else {
@@ -195,17 +183,11 @@ describe("isomorphic extend with webpack-dev-server", function() {
   }
 
   function verifySkipReload(callback) {
-    var log = console.log;
-    var found = false;
-
-    console.log = function(txt) {
-      if (txt.indexOf("extend require: skip reload. timestamp did not change") >= 0) {
-        found = true;
-        console.log = log;
-      }
-    };
-
     function check() {
+      var found = logs.find(function(x) {
+        return x.indexOf("config is now VALID - skip reload. timestamp did not change") >= 0;
+      });
+      logs = [];
       if (found) {
         callback();
       } else {
@@ -218,6 +200,11 @@ describe("isomorphic extend with webpack-dev-server", function() {
     fs.writeFileSync(configFile, JSON.stringify(isoConfig, null, 2));
     check();
   }
+
+  it("should have default log", function() {
+    logger.log = origLog;
+    logger.log("hello", "world", "from logger");
+  });
 
   it("should start and watch for file change event", function(done) {
     test(clone(webpackConfig), function() {

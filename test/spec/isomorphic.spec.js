@@ -19,6 +19,8 @@ var webpackConfig = clone(require("../webpack.config"));
 var configFile = Path.resolve(Config.configFile);
 var lockFile = Path.resolve(Config.lockFile);
 
+var logger = require("../../lib/logger");
+
 Config.defaultStartDelay = 0;
 
 describe("isomorphic extend", function() {
@@ -40,9 +42,23 @@ describe("isomorphic extend", function() {
   }
 
   before(cleanup);
+
+  var origLog = logger.log;
+  var logs = [];
+
+  beforeEach(function() {
+    Config.verbose = false;
+    Config.reloadDelay = 10;
+    logs = [];
+    logger.log = function() {
+      logs.push(Array.prototype.slice.apply(arguments).join(" "));
+    };
+  });
+
   afterEach(function() {
     extendRequire.deactivate();
     cleanup();
+    logger.log = origLog;
   });
 
   it("should generate assets file", function(done) {
