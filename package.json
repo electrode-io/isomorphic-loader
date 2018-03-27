@@ -6,15 +6,18 @@
   "scripts": {
     "wp": "webpack --config test/webpack.config.js",
     "wpd": "webpack-dev-server --config test/webpack.config.js",
-    "test": "npm run lint && mocha test/spec/*.js",
-    "coverage": "nyc --all --reporter=lcov --reporter=text --reporter=text-summary npm test",
-    "lint": "eslint *.js lib/*.js test/**/*.js",
-    "prepublish": "npm run lint && npm run coverage"
+    "test": "clap test",
+    "coverage": "clap check",
+    "lint": "clap lint",
+    "prepublishOnly": "clap check"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/jchip/isomorphic-loader.git"
   },
+  "files": [
+    "lib"
+  ],
   "keywords": [
     "webpack",
     "isomorphic",
@@ -36,30 +39,36 @@
     "deep-extend": "^0.5.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
     "clone": "^1.0.2",
-    "eslint": "^2.6.0",
+    "electrode-archetype-njs-module-dev": "^3.0.0",
     "fetch": "^1.0.1",
     "file-loader": "^0.8.5",
-    "mocha": "^2.4.5",
-    "nyc": "^11.0.2",
     "rimraf": "^2.5.2",
     "webpack": "^3",
     "webpack-dev-server": "^2"
   },
   "nyc": {
-    "check-coverage": true,
-    "lines": 100,
-    "statements": 100,
-    "functions": 100,
-    "branches": 100,
-    "cache": true,
     "all": true,
+    "reporter": [
+      "lcov",
+      "text",
+      "text-summary"
+    ],
     "exclude": [
-      "cli",
-      "xclap.js",
-      "test",
-      "coverage"
-    ]
+      "coverage",
+      "*clap.js",
+      "gulpfile.js",
+      "dist",
+      "test"
+    ],
+    "check-coverage": true,
+    "statements": 100,
+    "branches": 100,
+    "functions": 100,
+    "lines": 100,
+    "cache": true
+  },
+  "engines": {
+    "node": ">=6"
   }
 }

@@ -1,5 +1,7 @@
-var IsomorphicLoaderPlugin = require("../lib/webpack-plugin");
-var Path = require("path");
+"use strict";
+
+const IsomorphicLoaderPlugin = require("../lib/webpack-plugin");
+const Path = require("path");
 
 module.exports = {
   context: Path.resolve("test/client"),
