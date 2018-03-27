@@ -1,27 +1,30 @@
 "use strict";
 
-/*
- * MIT License http://www.opensource.org/licenses/mit-license.php
- */
+/* eslint-disable prefer-template */
 
-var chai = require("chai");
-var webpack = require("webpack");
-var fs = require("fs");
-var rimraf = require("rimraf");
-var Path = require("path");
-var Config = require("../../lib/config");
-var expect = chai.expect;
+const chai = require("chai");
+const webpack = require("webpack");
+const fs = require("fs");
+const rimraf = require("rimraf");
+const Path = require("path");
+const Config = require("../../lib/config");
+const expect = chai.expect;
 
-var extendRequire = require("../../lib/extend-require");
-var clone = require("clone");
-var webpackConfig = clone(require("../webpack.config"));
+const extendRequire = require("../../lib/extend-require");
+const clone = require("clone");
+const webpackConfig = clone(require("../webpack.config"));
 
-var configFile = Path.resolve(Config.configFile);
-var lockFile = Path.resolve(Config.lockFile);
+const configFile = Path.resolve(Config.configFile);
+const lockFile = Path.resolve(Config.lockFile);
 
-var logger = require("../../lib/logger");
+const logger = require("../../lib/logger");
 
 Config.defaultStartDelay = 0;
+
+process.on("unhandledRejection", (reason, p) => {
+  console.log("Unhandled Rejection at:", p, "reason:", reason);
+  // application specific logging, throwing an error, or other logic here
+});
 
 describe("isomorphic extend", function() {
   function cleanup() {
@@ -34,7 +37,7 @@ describe("isomorphic extend", function() {
       callback = config;
       config = webpackConfig;
     }
-    var compiler = webpack(config);
+    const compiler = webpack(config);
     compiler.run(function(err, stats) {
       stats.toString();
       callback(err);
@@ -43,8 +46,8 @@ describe("isomorphic extend", function() {
 
   before(cleanup);
 
-  var origLog = logger.log;
-  var logs = [];
+  const origLog = logger.log;
+  let logs = [];
 
   beforeEach(function() {
     Config.verbose = false;
@@ -64,9 +67,9 @@ describe("isomorphic extend", function() {
   it("should generate assets file", function(done) {
     function verify() {
       chai.assert(fs.existsSync(configFile), "config file doesn't exist");
-      var config = JSON.parse(fs.readFileSync(configFile));
-      var assets = JSON.parse(fs.readFileSync(Path.resolve(config.assetsFile)));
-      var expected = {
+      const config = JSON.parse(fs.readFileSync(configFile));
+      const assets = JSON.parse(fs.readFileSync(Path.resolve(config.assetsFile)));
+      const expected = {
         chunks: {
           main: "bundle.js"
         },
@@ -91,13 +94,13 @@ describe("isomorphic extend", function() {
   function verifyRequireAssets(publicPath) {
     publicPath = publicPath === undefined ? "/test/" : publicPath;
 
-    var smiley = require("../client/images/smiley.jpg");
-    var smiley2 = require("../client/images/smiley2.jpg");
-    var smileyFull = require(Path.resolve("test/client/images/smiley.jpg"));
-    var smileyPng = require("../client/images/smiley.png");
-    var smileySvg = require("../client/images/smiley.svg");
-    var fooBin = require("file!isomorphic!../client/data/foo.bin");
-    var expectedUrl = publicPath + "2029f1bb8dd109eb06f59157de62b529.jpg";
+    const smiley = require("../client/images/smiley.jpg");
+    const smiley2 = require("../client/images/smiley2.jpg");
+    const smileyFull = require(Path.resolve("test/client/images/smiley.jpg"));
+    const smileyPng = require("../client/images/smiley.png");
+    const smileySvg = require("../client/images/smiley.svg");
+    const fooBin = require("file!isomorphic!../client/data/foo.bin");
+    const expectedUrl = publicPath + "2029f1bb8dd109eb06f59157de62b529.jpg";
 
     expect(smiley).to.equal(expectedUrl);
     expect(smiley2).to.equal(expectedUrl);
@@ -197,15 +200,15 @@ describe("isomorphic extend", function() {
   it("should fail to extend if config file is invalid (Promise)", function() {
     if (typeof Promise === "undefined") {
       console.log("Promise not defined.  Skip test.");
-      return;
+      return undefined;
     }
 
     fs.writeFileSync(configFile, "bad");
     return extendRequire({ startDelay: 0 }).then(
-      function() {
+      () => {
         chai.assert(false, "expected error");
       },
-      function(err) {
+      err => {
         expect(err).to.be.ok;
       }
     );
@@ -220,7 +223,7 @@ describe("isomorphic extend", function() {
   });
 
   it("should handle undefined publicPath", function(done) {
-    var config = clone(webpackConfig);
+    const config = clone(webpackConfig);
     delete config.output.publicPath;
     generate(config, function() {
       extendRequire({ startDelay: 2 }, function() {
@@ -231,7 +234,7 @@ describe("isomorphic extend", function() {
   });
 
   it("should handle empty publicPath", function(done) {
-    var config = clone(webpackConfig);
+    const config = clone(webpackConfig);
     config.output.publicPath = "";
     generate(config, function() {
       extendRequire({ startDelay: 1 }, function() {
@@ -242,9 +245,9 @@ describe("isomorphic extend", function() {
   });
 
   it("should call processAssets", function(done) {
-    var config = clone(webpackConfig);
+    const config = clone(webpackConfig);
     generate(config, function() {
-      var processed = false;
+      let processed = false;
       extendRequire(
         {
           startDelay: 1,
@@ -276,7 +279,7 @@ describe("isomorphic extend", function() {
   });
 
   it("plugin should remove existing config base on option flag", function() {
-    var Plugin = require("../../lib/webpack-plugin");
+    const Plugin = require("../../lib/webpack-plugin");
     fs.writeFileSync(configFile, "{}");
     new Plugin({ keepExistingConfig: true }); // eslint-disable-line
     expect(fs.existsSync(configFile)).to.be.true;
@@ -287,7 +290,7 @@ describe("isomorphic extend", function() {
   it("should check lock file", function(done) {
     Config.lockFilePollInterval = 20;
     function verify() {
-      var begin = Date.now();
+      const begin = Date.now();
       fs.writeFileSync(lockFile, "lock");
       setTimeout(function() {
         fs.unlinkSync(lockFile);
@@ -309,7 +312,7 @@ describe("isomorphic extend", function() {
   it("should wait for valid config if file watcher is not setup yet", function(done) {
     Config.validPollInterval = 20;
     function verify() {
-      var config = JSON.parse(fs.readFileSync(configFile));
+      const config = JSON.parse(fs.readFileSync(configFile));
 
       function saveConfig(valid) {
         config.valid = valid;
@@ -324,7 +327,7 @@ describe("isomorphic extend", function() {
         saveConfig(true);
       }, 18);
 
-      var begin = Date.now();
+      const begin = Date.now();
       extendRequire(function(err) {
         expect(err).not.to.be.ok;
         expect(Date.now() - begin).to.be.above(20);
