@@ -1,28 +1,24 @@
 "use strict";
 
-/*
- * MIT License http://www.opensource.org/licenses/mit-license.php
- */
-
 /* eslint-disable max-nested-callbacks */
 
-var chai = require("chai");
-var webpack = require("webpack");
 var fs = require("fs");
-var rimraf = require("rimraf");
 var Path = require("path");
-var Config = require("../../lib/config");
-var expect = chai.expect;
-
-var extendRequire = require("../../lib/extend-require");
+var rimraf = require("rimraf");
+var chai = require("chai");
 var clone = require("clone");
-var WebpackDevServer = require("webpack-dev-server");
 var deepExtend = require("deep-extend");
 var fetchUrl = require("fetch").fetchUrl;
 
+var webpack = require("webpack");
+var WebpackDevServer = require("webpack-dev-server");
 var webpackConfig = clone(require("../webpack.config"));
-var IsomorphicLoaderPlugin = require("../../lib/webpack-plugin");
+var Config = require("../../lib/config");
 
+var expect = chai.expect;
+
+var extendRequire = require("../../lib/extend-require");
+var IsomorphicLoaderPlugin = require("../../lib/webpack-plugin");
 var logger = require("../../lib/logger");
 
 webpackConfig.output.path = "/";
@@ -56,7 +52,7 @@ describe("isomorphic extend with webpack-dev-server", function() {
     host: "localhost",
     port: 8080,
     publicPath: webpackConfig.output.publicPath,
-    outputPath: "/",
+    // outputPath: "/",
     filename: webpackConfig.output.filename,
     hot: false,
     contentBase: process.cwd(),
@@ -124,7 +120,7 @@ describe("isomorphic extend with webpack-dev-server", function() {
         setTimeout(check, 500);
       } else {
         // console.log("found");
-        verifyRemoteAssets("1fb0e331c05a52d5eb847d6fc018320d.ttf", callback);
+        verifyRemoteAssets("1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf", callback);
       }
     }
 
@@ -228,7 +224,7 @@ describe("isomorphic extend with webpack-dev-server", function() {
     ];
     test(wpConfig, function() {
       var font = require("../client/fonts/font.ttf");
-      expect(font).to.equal("http://localhost:8080/test/1fb0e331c05a52d5eb847d6fc018320d.ttf");
+      expect(font).to.equal("http://localhost:8080/test/1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf");
       var env = skipSetEnv ? (!!process.env.WEBPACK_DEV).toString() : process.env.WEBPACK_DEV;
       expect(env).to.equal((!skipSetEnv).toString());
       setTimeout(function() {

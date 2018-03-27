@@ -31,7 +31,7 @@
     "require"
   ],
   "author": "Joel Chen",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "deep-extend": "^0.5.0"
   },
@@ -44,8 +44,8 @@
     "mocha": "^2.4.5",
     "nyc": "^11.0.2",
     "rimraf": "^2.5.2",
-    "webpack": "^1.12.14",
-    "webpack-dev-server": "^1.14.1"
+    "webpack": "^3",
+    "webpack-dev-server": "^2"
   },
   "nyc": {
     "check-coverage": true,

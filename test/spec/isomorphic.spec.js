@@ -1,9 +1,5 @@
 "use strict";
 
-/*
- * MIT License http://www.opensource.org/licenses/mit-license.php
- */
-
 var chai = require("chai");
 var webpack = require("webpack");
 var fs = require("fs");
