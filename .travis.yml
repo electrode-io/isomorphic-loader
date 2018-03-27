@@ -2,7 +2,9 @@ language: node_js
 node_js:
   - v6
   - v8
-script: npm run coverage
+before_install: npm install -g fyn
+install: eval `fyn bash` && fyn --pg none install
+script: eval `fyn bash` && npm run coverage
 notifications:
   email:
     - joel123@gmail.com

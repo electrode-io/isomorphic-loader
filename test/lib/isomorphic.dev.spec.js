@@ -10,9 +10,6 @@ const clone = require("clone");
 const deepExtend = require("deep-extend");
 const fetchUrl = require("fetch").fetchUrl;
 
-const webpack = require("webpack");
-const WebpackDevServer = require("webpack-dev-server");
-const webpackConfig = clone(require("../webpack.config"));
 const Config = require("../../lib/config");
 
 const expect = chai.expect;
@@ -21,19 +18,20 @@ const extendRequire = require("../../lib/extend-require");
 const IsomorphicLoaderPlugin = require("../../lib/webpack-plugin");
 const logger = require("../../lib/logger");
 
-webpackConfig.output.path = "/";
+module.exports = function isomorphicDevSpec({ tag, webpack, WebpackDevServer, webpackConfig }) {
+  webpackConfig.output.path = "/";
 
-describe("isomorphic extend with webpack-dev-server", function() {
-  this.timeout(4000);
   Config.initialWaitingNoticeDelay = 0;
 
   const configFile = Path.resolve(Config.configFile);
 
   function writeFont(data) {
+    // default font file md5 1e2bf10d5113abdb2ca03d0d0f4f7dd1
     fs.writeFileSync(Path.resolve("test/client/fonts/font.ttf"), data || "ttfttfttf\nfontfontfont");
   }
 
   function cleanup() {
+    rimraf.sync(Path.resolve("test/dist"));
     writeFont();
     rimraf.sync(configFile);
   }
@@ -76,6 +74,8 @@ describe("isomorphic extend with webpack-dev-server", function() {
         webpackDevServer = undefined;
         callback();
       });
+    } else {
+      callback();
     }
   }
 
@@ -84,6 +84,7 @@ describe("isomorphic extend with webpack-dev-server", function() {
   const origLog = logger.log;
   let logs = [];
   beforeEach(function() {
+    cleanup();
     Config.verbose = true;
     Config.reloadDelay = 10;
     logs = [];
@@ -92,35 +93,38 @@ describe("isomorphic extend with webpack-dev-server", function() {
     };
   });
 
-  afterEach(function() {
+  afterEach(function(done) {
     extendRequire.deactivate();
     cleanup();
     logger.log = origLog;
+    stop(done);
   });
+
+  const fontFile = "test/client/fonts/font.ttf";
 
   function verifyRemoteAssets(fontHash, callback) {
     fetchUrl("http://localhost:8080/test/isomorphic-assets.json", function(err, meta, body) {
       expect(meta.status).to.equal(200);
       const assets = JSON.parse(body.toString());
-      expect(assets.marked["test/client/fonts/font.ttf"]).to.equal(fontHash);
+      expect(assets.marked[fontFile]).to.equal(fontHash);
       callback();
     });
   }
 
   function verifyFontChange(callback) {
-    writeFont("testtesttest");
+    writeFont("testtesttest"); // font.ttf md5 1fb0e331c05a52d5eb847d6fc018320d
 
     function check() {
       if (
-        !logs.find(function(x) {
-          // console.log("checking", x);
+        !logs.find(x => {
+          console.log("checking", x);
           return x.indexOf("config is now VALID") >= 0;
         })
       ) {
         setTimeout(check, 500);
       } else {
-        // console.log("found");
-        verifyRemoteAssets("1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf", callback);
+        console.log("found");
+        verifyRemoteAssets("1fb0e331c05a52d5eb847d6fc018320d.ttf", callback);
       }
     }
 
@@ -128,10 +132,10 @@ describe("isomorphic extend with webpack-dev-server", function() {
   }
 
   function test(config, callback) {
-    start(config, devConfig, function() {
-      extendRequire(function() {
-        verifyRemoteAssets("1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf", function() {
-          setTimeout(function() {
+    start(config, devConfig, () => {
+      extendRequire(() => {
+        verifyRemoteAssets("1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf", () => {
+          setTimeout(() => {
             verifyFontChange(callback);
           }, 25);
         });
@@ -198,12 +202,12 @@ describe("isomorphic extend with webpack-dev-server", function() {
     check();
   }
 
-  it("should have default log", function() {
+  it(`should have default log @${tag}`, function() {
     logger.log = origLog;
     logger.log("hello", "world", "from logger");
   });
 
-  it("should start and watch for file change event", function(done) {
+  it(`should start and watch for file change event @${tag}`, function(done) {
     test(clone(webpackConfig), () => {
       verifyRenameEvent(() => {
         setTimeout(() => {
@@ -222,16 +226,19 @@ describe("isomorphic extend with webpack-dev-server", function() {
         webpackDev: { url: "http://localhost:8080", addUrl: true, skipSetEnv: skipSetEnv }
       })
     ];
-    test(wpConfig, function() {
+    test(wpConfig, () => {
+      delete require.cache[require.resolve("../client/fonts/font.ttf")];
       const font = require("../client/fonts/font.ttf");
-      expect(font).to.equal("http://localhost:8080/test/1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf");
+      console.log("font", font);
+      expect(font).to.equal("http://localhost:8080/test/1fb0e331c05a52d5eb847d6fc018320d.ttf");
+      delete require.cache[require.resolve("../client/fonts/font.ttf")];
       const env = skipSetEnv ? (!!process.env.WEBPACK_DEV).toString() : process.env.WEBPACK_DEV;
       expect(env).to.equal((!skipSetEnv).toString());
-      setTimeout(function() {
-        verifySkipReload(function() {
-          verifyBadConfig(function() {
+      setTimeout(() => {
+        verifySkipReload(() => {
+          verifyBadConfig(() => {
             fs.unlinkSync(configFile);
-            setTimeout(function() {
+            setTimeout(() => {
               extendRequire.deactivate();
               stop(done);
             }, 10);
@@ -241,13 +248,13 @@ describe("isomorphic extend with webpack-dev-server", function() {
     });
   }
 
-  it("should start and add webpack dev server URL", function(done) {
+  it(`should start and add webpack dev server URL @${tag}`, function(done) {
     delete process.env.WEBPACK_DEV;
     testAddUrl("/test/", true, done);
   });
 
-  it("should start and add webpack dev server URL and /", function(done) {
+  it(`should start and add webpack dev server URL and / @${tag}`, function(done) {
     delete process.env.WEBPACK_DEV;
     testAddUrl("test/", false, done);
   });
-});
+};

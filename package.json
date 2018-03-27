@@ -41,11 +41,13 @@
   "devDependencies": {
     "clone": "^1.0.2",
     "electrode-archetype-njs-module-dev": "^3.0.0",
+    "electrode-cdn-file-loader": "^1.1.1",
     "fetch": "^1.0.1",
-    "file-loader": "^0.8.5",
+    "file-loader": "^1.0.0",
     "rimraf": "^2.5.2",
     "webpack": "^3",
-    "webpack-dev-server": "^2"
+    "webpack-dev-server": "^2",
+    "webpack4": "./test/webpack4"
   },
   "nyc": {
     "all": true,

@@ -2,31 +2,25 @@
 
 /* eslint-disable prefer-template */
 
-const chai = require("chai");
-const webpack = require("webpack");
 const fs = require("fs");
-const rimraf = require("rimraf");
 const Path = require("path");
+const clone = require("clone");
+const chai = require("chai");
+const rimraf = require("rimraf");
 const Config = require("../../lib/config");
 const expect = chai.expect;
-
 const extendRequire = require("../../lib/extend-require");
-const clone = require("clone");
-const webpackConfig = clone(require("../webpack.config"));
 
 const configFile = Path.resolve(Config.configFile);
 const lockFile = Path.resolve(Config.lockFile);
 
 const logger = require("../../lib/logger");
 
-Config.defaultStartDelay = 0;
+module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
+  const SAVE_CONFIG = clone(Config);
 
-process.on("unhandledRejection", (reason, p) => {
-  console.log("Unhandled Rejection at:", p, "reason:", reason);
-  // application specific logging, throwing an error, or other logic here
-});
+  Config.defaultStartDelay = 0;
 
-describe("isomorphic extend", function() {
   function cleanup() {
     rimraf.sync(Path.resolve("test/dist"));
     rimraf.sync(configFile);
@@ -46,10 +40,15 @@ describe("isomorphic extend", function() {
 
   before(cleanup);
 
+  after(() => {
+    Object.assign(Config, SAVE_CONFIG);
+  });
+
   const origLog = logger.log;
   let logs = [];
 
   beforeEach(function() {
+    cleanup();
     Config.verbose = false;
     Config.reloadDelay = 10;
     logs = [];
@@ -64,7 +63,7 @@ describe("isomorphic extend", function() {
     logger.log = origLog;
   });
 
-  it("should generate assets file", function(done) {
+  it(`should generate assets file @${tag}`, function(done) {
     function verify() {
       chai.assert(fs.existsSync(configFile), "config file doesn't exist");
       const config = JSON.parse(fs.readFileSync(configFile));
@@ -125,9 +124,10 @@ describe("isomorphic extend", function() {
   }
 
   function verifyExtend(callback) {
-    extendRequire({ startDelay: 0 }, function() {
+    extendRequire({ startDelay: 0 }, function(err) {
+      if (err) return callback(err);
       verifyRequireAssets();
-      callback();
+      return callback();
     });
   }
 
@@ -137,20 +137,20 @@ describe("isomorphic extend", function() {
       .then(callback);
   }
 
-  it("should extend require", function(done) {
+  it(`should extend require @${tag}`, function(done) {
     generate(function() {
       verifyExtend(done);
     });
   });
 
-  it("should wait for generate", function(done) {
+  it(`should wait for generate @${tag}`, function(done) {
     verifyExtend(done);
     setTimeout(function() {
       generate(function() {});
     }, Config.pollConfigInterval + 1);
   });
 
-  it("should timeout if wait over waitConfigTimeout", function(done) {
+  it(`should timeout if wait over waitConfigTimeout @${tag}`, function(done) {
     Config.initialWaitingNoticeDelay = 50;
     Config.waitConfigTimeout = 100;
     extendRequire({ startDelay: 0 }, function(err) {
@@ -159,7 +159,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should support Promise", function(done) {
+  it(`should support Promise @${tag}`, function(done) {
     if (typeof Promise !== "undefined") {
       generate(function() {
         verifyExtendPromise(done);
@@ -170,14 +170,14 @@ describe("isomorphic extend", function() {
     }
   });
 
-  it("should fail to load if config doesn't exist", function(done) {
+  it(`should fail to load if config doesn't exist @${tag}`, function(done) {
     extendRequire.loadAssets(function(err) {
       expect(err).to.be.ok;
       done();
     });
   });
 
-  it("should fail to load if assets file doesn't exist", function(done) {
+  it(`should fail to load if assets file doesn't exist @${tag}`, function(done) {
     generate(function() {
       rimraf.sync(Path.resolve("test/dist"));
       extendRequire.loadAssets(function(err) {
@@ -187,7 +187,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should fail to load if assets file is invalid", function(done) {
+  it(`should fail to load if assets file is invalid @${tag}`, function(done) {
     generate(function() {
       fs.writeFileSync(Path.resolve("test/dist/isomorphic-assets.json"), "bad");
       extendRequire.loadAssets(function(err) {
@@ -197,7 +197,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should fail to extend if config file is invalid (Promise)", function() {
+  it(`should fail to extend if config file is invalid (Promise) @${tag}`, function() {
     if (typeof Promise === "undefined") {
       console.log("Promise not defined.  Skip test.");
       return undefined;
@@ -214,7 +214,7 @@ describe("isomorphic extend", function() {
     );
   });
 
-  it("should fail to extend if config file is invalid (callback)", function(done) {
+  it(`should fail to extend if config file is invalid (callback) @${tag}`, function(done) {
     fs.writeFileSync(configFile, "bad");
     extendRequire({ startDelay: 1 }, function(err) {
       expect(err).to.be.ok;
@@ -222,7 +222,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should handle undefined publicPath", function(done) {
+  it(`should handle undefined publicPath @${tag}`, function(done) {
     const config = clone(webpackConfig);
     delete config.output.publicPath;
     generate(config, function() {
@@ -233,7 +233,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should handle empty publicPath", function(done) {
+  it(`should handle empty publicPath @${tag}`, function(done) {
     const config = clone(webpackConfig);
     config.output.publicPath = "";
     generate(config, function() {
@@ -244,7 +244,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should call processAssets", function(done) {
+  it(`should call processAssets @${tag}`, function(done) {
     const config = clone(webpackConfig);
     generate(config, function() {
       let processed = false;
@@ -264,12 +264,12 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("setAssets should handle non-object", function() {
+  it(`setAssets should handle non-object @${tag}`, function() {
     extendRequire._instance.setAssets(null);
     expect(extendRequire._instance.assetsCount).to.equal(0);
   });
 
-  it("should fail if config version and package version mismatch", function(done) {
+  it(`should fail if config version and package version mismatch @${tag}`, function(done) {
     generate(function() {
       extendRequire({ startDelay: 0, version: "0.0.1" }, function(err) {
         expect(err).to.be.ok;
@@ -278,7 +278,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("plugin should remove existing config base on option flag", function() {
+  it(`plugin should remove existing config base on option flag @${tag}`, function() {
     const Plugin = require("../../lib/webpack-plugin");
     fs.writeFileSync(configFile, "{}");
     new Plugin({ keepExistingConfig: true }); // eslint-disable-line
@@ -287,7 +287,7 @@ describe("isomorphic extend", function() {
     expect(fs.existsSync(configFile)).to.be.false;
   });
 
-  it("should check lock file", function(done) {
+  it(`should check lock file @${tag}`, function(done) {
     Config.lockFilePollInterval = 20;
     function verify() {
       const begin = Date.now();
@@ -309,7 +309,7 @@ describe("isomorphic extend", function() {
     });
   });
 
-  it("should wait for valid config if file watcher is not setup yet", function(done) {
+  it(`should wait for valid config if file watcher is not setup yet @${tag}`, function(done) {
     Config.validPollInterval = 20;
     function verify() {
       const config = JSON.parse(fs.readFileSync(configFile));
@@ -340,4 +340,4 @@ describe("isomorphic extend", function() {
       setTimeout(verify, 10);
     });
   });
-});
+};
