@@ -1,9 +1,7 @@
-/*
- * MIT License http://www.opensource.org/licenses/mit-license.php
- */
+"use strict";
 
-var IsomorphicLoaderPlugin = require("../lib/webpack-plugin");
-var Path = require("path");
+const IsomorphicLoaderPlugin = require("../lib/webpack-plugin");
+const Path = require("path");
 
 module.exports = {
   context: Path.resolve("test/client"),
@@ -15,16 +13,14 @@ module.exports = {
   },
   plugins: [new IsomorphicLoaderPlugin({ webpackDev: { addUrl: false } })],
   module: {
-    loaders: [
+    rules: [
       {
-        name: "images",
         test: /\.(jpe?g|png|gif|svg)$/i,
-        loader: "file!../.."
+        loader: "file-loader!../.."
       },
       {
-        name: "fonts",
         test: /\.(ttf|eot)$/,
-        loader: "file!../.."
+        loader: "file-loader!../.."
       }
     ]
   }
