@@ -23,6 +23,7 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
 
   function cleanup() {
     rimraf.sync(Path.resolve("test/dist"));
+    rimraf.sync(lockFile);
     rimraf.sync(configFile);
   }
 
@@ -63,6 +64,16 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     logger.log = origLog;
   });
 
+  const waitForUnlockConfig = callback => {
+    if (!fs.existsSync(configFile)) {
+      setTimeout(() => waitForUnlockConfig(callback), 10);
+    } else if (fs.existsSync(lockFile)) {
+      setTimeout(() => waitForUnlockConfig(callback), 10);
+    } else {
+      setTimeout(callback, 0);
+    }
+  };
+
   it(`should generate assets file @${tag}`, function(done) {
     function verify() {
       chai.assert(fs.existsSync(configFile), "config file doesn't exist");
@@ -85,8 +96,9 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
       done();
     }
 
-    generate(function() {
-      setTimeout(verify, 10);
+    generate(function(err) {
+      if (err) done(err);
+      else waitForUnlockConfig(verify);
     });
   });
 
@@ -98,7 +110,7 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     const smileyFull = require(Path.resolve("test/client/images/smiley.jpg"));
     const smileyPng = require("../client/images/smiley.png");
     const smileySvg = require("../client/images/smiley.svg");
-    const fooBin = require("file!isomorphic!../client/data/foo.bin");
+    const fooBin = require("file-loader!isomorphic!../client/data/foo.bin");
     const expectedUrl = publicPath + "2029f1bb8dd109eb06f59157de62b529.jpg";
 
     expect(smiley).to.equal(expectedUrl);
@@ -138,15 +150,19 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   }
 
   it(`should extend require @${tag}`, function(done) {
-    generate(function() {
-      verifyExtend(done);
+    generate(err => {
+      if (err) return done(err);
+      return waitForUnlockConfig(() => verifyExtend(done));
     });
   });
 
   it(`should wait for generate @${tag}`, function(done) {
-    verifyExtend(done);
-    setTimeout(function() {
-      generate(function() {});
+    let error;
+    verifyExtend(err => {
+      done(error || err);
+    });
+    setTimeout(() => {
+      generate(err => (error = err));
     }, Config.pollConfigInterval + 1);
   });
 
@@ -161,8 +177,9 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
 
   it(`should support Promise @${tag}`, function(done) {
     if (typeof Promise !== "undefined") {
-      generate(function() {
-        verifyExtendPromise(done);
+      generate(err => {
+        if (err) done(err);
+        else waitForUnlockConfig(() => verifyExtendPromise(done));
       });
     } else {
       console.log("Promise not defined.  Skip test.");
@@ -178,21 +195,28 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   });
 
   it(`should fail to load if assets file doesn't exist @${tag}`, function(done) {
-    generate(function() {
-      rimraf.sync(Path.resolve("test/dist"));
-      extendRequire.loadAssets(function(err) {
-        expect(err).to.be.ok;
-        done();
+    generate(err => {
+      if (err) return done(err);
+      return waitForUnlockConfig(() => {
+        rimraf.sync(Path.resolve("test/dist"));
+        extendRequire.loadAssets(err2 => {
+          expect(err2).to.be.ok;
+          done();
+        });
       });
     });
   });
 
   it(`should fail to load if assets file is invalid @${tag}`, function(done) {
-    generate(function() {
-      fs.writeFileSync(Path.resolve("test/dist/isomorphic-assets.json"), "bad");
-      extendRequire.loadAssets(function(err) {
-        expect(err).to.be.ok;
-        done();
+    generate(err => {
+      if (err) return done(err);
+      return waitForUnlockConfig(() => {
+        fs.writeFileSync(Path.resolve("test/dist/isomorphic-assets.json"), "bad");
+
+        return extendRequire.loadAssets(err2 => {
+          expect(err2).to.be.ok;
+          done();
+        });
       });
     });
   });
@@ -216,7 +240,7 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
 
   it(`should fail to extend if config file is invalid (callback) @${tag}`, function(done) {
     fs.writeFileSync(configFile, "bad");
-    extendRequire({ startDelay: 1 }, function(err) {
+    extendRequire({ startDelay: 1 }, err => {
       expect(err).to.be.ok;
       done();
     });
@@ -225,42 +249,63 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   it(`should handle undefined publicPath @${tag}`, function(done) {
     const config = clone(webpackConfig);
     delete config.output.publicPath;
-    generate(config, function() {
-      extendRequire({ startDelay: 2 }, function() {
-        verifyRequireAssets("");
-        done();
-      });
+    generate(config, err => {
+      if (err) done(err);
+      else {
+        waitForUnlockConfig(() => {
+          extendRequire({ startDelay: 2 }, err2 => {
+            if (err2) done(err2);
+            else {
+              verifyRequireAssets("");
+              done();
+            }
+          });
+        });
+      }
     });
   });
 
   it(`should handle empty publicPath @${tag}`, function(done) {
     const config = clone(webpackConfig);
     config.output.publicPath = "";
-    generate(config, function() {
-      extendRequire({ startDelay: 1 }, function() {
-        verifyRequireAssets("");
-        done();
-      });
+    generate(config, err => {
+      if (err) done(err);
+      else {
+        waitForUnlockConfig(() => {
+          extendRequire({ startDelay: 1 }, err2 => {
+            if (err2) done(err2);
+            else {
+              verifyRequireAssets("");
+              done();
+            }
+          });
+        });
+      }
     });
   });
 
   it(`should call processAssets @${tag}`, function(done) {
     const config = clone(webpackConfig);
-    generate(config, function() {
-      let processed = false;
-      extendRequire(
-        {
-          startDelay: 1,
-          processAssets: function(a) {
-            processed = !!a;
-            return a;
-          }
-        },
-        function() {
-          expect(processed).to.be.true;
-          done();
-        }
-      );
+    generate(config, err => {
+      if (err) done(err);
+      else {
+        waitForUnlockConfig(() => {
+          let processed = false;
+          extendRequire(
+            {
+              startDelay: 1,
+              processAssets: function(a) {
+                processed = !!a;
+                return a;
+              }
+            },
+            function() {
+              expect(processed).to.be.true;
+              done();
+            }
+          );
+        });
+      }
     });
   });
 
@@ -270,11 +315,14 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   });
 
   it(`should fail if config version and package version mismatch @${tag}`, function(done) {
-    generate(function() {
-      extendRequire({ startDelay: 0, version: "0.0.1" }, function(err) {
-        expect(err).to.be.ok;
-        done();
-      });
+    generate(err => {
+      if (err) done(err);
+      else {
+        extendRequire({ startDelay: 0, version: "0.0.1" }, function(err2) {
+          expect(err2).to.be.ok;
+          done();
+        });
+      }
     });
   });
 
@@ -304,8 +352,8 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     }
 
     generate(function(err) {
-      expect(err).not.to.be.ok;
-      setTimeout(verify, 10);
+      if (err) done(err);
+      else waitForUnlockConfig(verify);
     });
   });
 
@@ -336,8 +384,8 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     }
 
     generate(function(err) {
-      expect(err).not.to.be.ok;
-      setTimeout(verify, 10);
+      if (err) done(err);
+      else waitForUnlockConfig(verify);
     });
   });
 };
