@@ -34,9 +34,13 @@ module.exports = function isomorphicDevSpec({ tag, webpack, WebpackDevServer, we
   }
 
   function cleanup() {
-    rimraf.sync(Path.resolve("test/dist"));
-    writeFont();
-    rimraf.sync(configFile);
+    try {
+      rimraf.sync(Path.resolve("test/dist"));
+      writeFont();
+      rimraf.sync(configFile);
+    } catch (e) {
+      //
+    }
   }
 
   let webpackDevServer;

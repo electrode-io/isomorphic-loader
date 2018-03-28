@@ -22,9 +22,13 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   Config.defaultStartDelay = 0;
 
   function cleanup() {
-    rimraf.sync(Path.resolve("test/dist"));
-    rimraf.sync(lockFile);
-    rimraf.sync(configFile);
+    try {
+      rimraf.sync(Path.resolve("test/dist"));
+      rimraf.sync(lockFile);
+      rimraf.sync(configFile);
+    } catch (e) {
+      //
+    }
   }
 
   function generate(config, callback) {
