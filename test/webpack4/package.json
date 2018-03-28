@@ -1,0 +1,14 @@
+{
+  "name": "webpack4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+  },
+  "dependencies": {
+    "webpack": "^4",
+    "webpack-cli": "^2",
+    "webpack-dev-server": "^3"
+  },
+  "private": true
+}
