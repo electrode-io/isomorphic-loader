@@ -123,13 +123,11 @@ module.exports = function isomorphicDevSpec({ tag, webpack, WebpackDevServer, we
     logs = [];
     writeFont("testtesttest"); // font.ttf md5 1fb0e331c05a52d5eb847d6fc018320d
 
+    const startTime = Date.now();
     function check() {
-      if (
-        !logs.find(x => {
-          // console.log("checking", x);
-          return x.indexOf("config is now VALID") >= 0;
-        })
-      ) {
+      if (Date.now() - startTime > 5000) {
+        callback(new Error("waiting for font change valid message timeout"));
+      } else if (!logs.find(x => x.indexOf("config is now VALID") >= 0)) {
         setTimeout(check, 500);
       } else {
         // console.log("found");
@@ -137,7 +135,7 @@ module.exports = function isomorphicDevSpec({ tag, webpack, WebpackDevServer, we
       }
     }
 
-    setTimeout(check, 500);
+    check();
   }
 
   function testWebpackDevServer(config, callback) {
@@ -145,8 +143,9 @@ module.exports = function isomorphicDevSpec({ tag, webpack, WebpackDevServer, we
       if (err) return callback(err);
       return extendRequire(err2 => {
         if (err2) return callback(err2);
-        return verifyRemoteAssets(defaultFontHash, () => {
-          setTimeout(() => {
+        return verifyRemoteAssets(defaultFontHash, err3 => {
+          if (err3) return callback(err3);
+          return setTimeout(() => {
             verifyFontChange(callback);
           }, 25);
         });
