@@ -9,7 +9,7 @@ const chai = require("chai");
 const clone = require("clone");
 const deepExtend = require("deep-extend");
 const fetchUrl = require("fetch").fetchUrl;
-
+const Pkg = require("../../package.json");
 const Config = require("../../lib/config");
 
 const expect = chai.expect;
@@ -266,7 +266,7 @@ module.exports = function isomorphicDevSpec({ tag, webpack, WebpackDevServer, we
 
   const mockConfig = {
     valid: true,
-    version: "1.6.5",
+    version: Pkg.version,
     timestamp: Date.now(),
     context: "test/client",
     output: {
