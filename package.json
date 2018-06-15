@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jchip/isomorphic-loader.git"
+    "url": "https://github.com/electrode-io/isomorphic-loader.git"
   },
   "files": [
     "lib"
