@@ -1,7 +1,7 @@
 language: node_js
 node_js:
-  - v6
   - v8
+  - v10
 before_install: npm install -g fyn
 install: eval `fyn bash` && fyn --pg none install
 script: eval `fyn bash` && npm run coverage
