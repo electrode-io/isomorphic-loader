@@ -36,7 +36,7 @@
   "author": "Joel Chen",
   "license": "Apache-2.0",
   "dependencies": {
-    "deep-extend": "^0.5.0"
+    "deep-extend": "^0.6.0"
   },
   "devDependencies": {
     "clone": "^1.0.2",

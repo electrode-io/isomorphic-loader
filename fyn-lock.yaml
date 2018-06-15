@@ -2005,11 +2005,11 @@ deep-equal:
 deep-extend:
  _:
   ^0.4.0: 0.4.2
-  ^0.5.0: 0.5.0
- 0.5.0:
+  ^0.6.0: 0.6.0
+ 0.6.0:
   top: 1
-  $: 6ef4a09b05f98b0e358d6d93d4ca3caec6672803
-  _: 'https://registry.npmjs.org/deep-extend/-/deep-extend-0.5.0.tgz'
+  $: c4fa7c95404a17a9c3e8ca7e1537312b736330ac
+  _: 'https://registry.npmjs.org/deep-extend/-/deep-extend-0.6.0.tgz'
  0.4.2:
   $: 48b699c27e334bf89f10892be432f6e4c7d34a7f
   _: 'https://registry.npmjs.org/deep-extend/-/deep-extend-0.4.2.tgz'
@@ -7374,7 +7374,7 @@ webpack4:
  1.0.0-fynlocal:
   top: 1
   $: local
-  _: /Users/xchen11/dev/pub/isomorphic-loader/test/webpack4
+  _: test/webpack4
   dependencies:
    webpack: ^4
    webpack-cli: ^2
