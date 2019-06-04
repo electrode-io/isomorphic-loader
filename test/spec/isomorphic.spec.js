@@ -1,31 +1,15 @@
 "use strict";
 
 const clone = require("clone");
+const webpackInfo = require("../lib/webpack-info");
 
-const testInfo = {
-  v3: {
-    skip: false,
-    webpack: "webpack@3.x.x",
-    config: "../webpack.config"
-  },
-  v4: {
-    skip: false,
-    webpack: "webpack@4.x.x",
-    config: "../webpack4.config"
-  }
-};
-
-Object.keys(testInfo).forEach(ver => {
-  const info = testInfo[ver];
+Object.keys(webpackInfo).forEach(ver => {
+  const info = webpackInfo[ver];
   if (info.skip) return;
   describe(`isomorphic extend with webpack ${ver}`, function() {
-    this.timeout(10000);
-    /*
-     * This usage of require depends on fyn and flat-module
-     */
-
-    const webpack = require(info.webpack);
-    const webpackConfig = clone(require(info.config));
+    this.timeout(20000);
+    const webpack = info.xrequire(info.webpack);
+    const webpackConfig = clone(info.xrequire(info.config));
     require("../lib/isomorphic.spec")({
       tag: `webpack_${ver}`,
       webpack,
