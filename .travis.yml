@@ -3,8 +3,8 @@ node_js:
   - v8
   - v10
 before_install: npm install -g fyn
-install: eval `fyn bash` && fyn --pg none install
-script: eval `fyn bash` && npm run coverage
+install: fyn --pg none install
+script: npm run coverage
 notifications:
   email:
     - joel123@gmail.com

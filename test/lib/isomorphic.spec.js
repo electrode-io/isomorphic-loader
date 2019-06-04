@@ -10,9 +10,10 @@ const rimraf = require("rimraf");
 const Config = require("../../lib/config");
 const expect = chai.expect;
 const extendRequire = require("../../lib/extend-require");
+const lockFile = require("lockfile");
 
 const configFile = Path.resolve(Config.configFile);
-const lockFile = Path.resolve(Config.lockFile);
+const lockFileName = Path.resolve(Config.lockFile);
 
 const logger = require("../../lib/logger");
 
@@ -24,7 +25,7 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   function cleanup() {
     try {
       rimraf.sync(Path.resolve("test/dist"));
-      rimraf.sync(lockFile);
+      // rimraf.sync(lockFileName);
       rimraf.sync(configFile);
     } catch (e) {
       //
@@ -49,7 +50,7 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     Object.assign(Config, SAVE_CONFIG);
   });
 
-  const origLog = logger.log;
+  const origLog = Object.assign({}, logger);
   let logs = [];
 
   beforeEach(function() {
@@ -60,19 +61,20 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     logger.log = function() {
       logs.push(Array.prototype.slice.apply(arguments).join(" "));
     };
+    logger.error = logger.log;
   });
 
   afterEach(function() {
     extendRequire.deactivate();
     cleanup();
-    logger.log = origLog;
+    Object.assign(logger, origLog);
   });
 
   const waitForUnlockConfig = callback => {
     if (!fs.existsSync(configFile)) {
-      setTimeout(() => waitForUnlockConfig(callback), 10);
-    } else if (fs.existsSync(lockFile)) {
-      setTimeout(() => waitForUnlockConfig(callback), 10);
+      setTimeout(() => waitForUnlockConfig(callback), 500);
+    } else if (fs.existsSync(lockFileName)) {
+      setTimeout(() => waitForUnlockConfig(callback), 500);
     } else {
       setTimeout(callback, 0);
     }
@@ -201,12 +203,15 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
   it(`should fail to load if assets file doesn't exist @${tag}`, function(done) {
     generate(err => {
       if (err) return done(err);
-      return waitForUnlockConfig(() => {
-        rimraf.sync(Path.resolve("test/dist"));
-        extendRequire.loadAssets(err2 => {
+
+      rimraf.sync(Path.resolve("test/dist"));
+      return extendRequire.loadAssets(err2 => {
+        try {
           expect(err2).to.be.ok;
-          done();
-        });
+          return done();
+        } catch (err3) {
+          return done(err3);
+        }
       });
     });
   });
@@ -343,15 +348,15 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     Config.lockFilePollInterval = 20;
     function verify() {
       const begin = Date.now();
-      fs.writeFileSync(lockFile, "lock");
-      setTimeout(function() {
-        fs.unlinkSync(lockFile);
-      }, 18);
-
-      extendRequire(function(err) {
-        expect(err).not.to.be.ok;
-        expect(Date.now() - begin).to.be.above(20);
-        done();
+      lockFile.lock(lockFileName, {}, () => {
+        extendRequire(err => {
+          expect(err).not.to.be.ok;
+          expect(Date.now() - begin).to.be.above(20);
+          done();
+        });
+        setTimeout(() => {
+          lockFile.unlock(lockFileName);
+        }, 18);
       });
     }
 
@@ -390,6 +395,21 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     generate(function(err) {
       if (err) done(err);
       else waitForUnlockConfig(verify);
+    });
+  });
+
+  it(`should log if write config file failed @${tag}`, function(done) {
+    Config.configFile = `/.test.config.json`;
+    generate(() => {
+      setTimeout(() => {
+        const msg = logs.find(x => x.indexOf("failed write config file") > 0);
+        try {
+          expect(msg).contains("failed write config file");
+          return done();
+        } catch (err) {
+          return done(err);
+        }
+      }, 50);
     });
   });
 };
