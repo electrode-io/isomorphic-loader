@@ -1,6 +1,6 @@
 {
   "name": "isomorphic-loader",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Webpack isomorphic loader tools to make Node require handle files like images for Server Side Rendering (SSR)",
   "main": "index.js",
   "scripts": {
