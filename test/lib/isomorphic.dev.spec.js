@@ -11,6 +11,7 @@ const deepExtend = require("deep-extend");
 const fetchUrl = require("fetch").fetchUrl;
 const Pkg = require("../../package.json");
 const Config = require("../../lib/config");
+const { asyncVerify, runDefer, runFinally } = require("run-verify");
 
 const expect = chai.expect;
 
@@ -47,6 +48,7 @@ module.exports = function isomorphicDevSpec({
     }
 
     function cleanup() {
+      delete process.send;
       try {
         rimraf.sync(Path.resolve("test/dist"));
         writeFont();
@@ -281,6 +283,26 @@ module.exports = function isomorphicDevSpec({
     it(`should start and add webpack dev server URL and / @${tag}`, function(done) {
       delete process.env.WEBPACK_DEV;
       testAddUrl("test/", false, done);
+    });
+
+    it(`should use process.send @${tag}`, () => {
+      const defer = runDefer();
+      process.send = defer.resolve;
+
+      const wpConfig = clone(webpackConfig);
+      wpConfig.output.publicPath = "test/";
+      wpConfig.plugins = [
+        new IsomorphicLoaderPlugin({
+          webpackDev: { url: "http://localhost:8080", addUrl: true, skipSetEnv: true }
+        })
+      ];
+
+      return asyncVerify(
+        next => start(wpConfig, devConfig, next),
+        defer.wait(),
+        r => expect(r).has.property("name", "isomorphic-loader-config"),
+        runFinally(() => new Promise(resolve => stopWebpackDevServer(resolve)))
+      );
     });
 
     const mockConfig = {
