@@ -48,7 +48,7 @@
     "rimraf": "^2.5.2",
     "run-verify": "^1.2.1",
     "webpack": "^3",
-    "webpack-dev-server": "^2",
+    "webpack-dev-server": "^3",
     "webpack4": "./test/webpack4"
   },
   "nyc": {
