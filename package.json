@@ -11,6 +11,9 @@
     "lint": "clap lint",
     "prepublishOnly": "clap check"
   },
+  "publishConfig": {
+    "tag": "v2"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/electrode-io/isomorphic-loader.git"
