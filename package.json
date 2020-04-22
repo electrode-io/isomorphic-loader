@@ -1,6 +1,6 @@
 {
   "name": "isomorphic-loader",
-  "version": "2.1.1",
+  "version": "3.0.1",
   "description": "Webpack isomorphic loader tools to make Node require handle files like images for Server Side Rendering (SSR)",
   "main": "index.js",
   "scripts": {
@@ -46,9 +46,11 @@
     "fetch": "^1.0.1",
     "file-loader": "^1.0.0",
     "rimraf": "^2.5.2",
+    "run-verify": "^1.2.4",
     "webpack": "^4",
     "webpack-dev-server": "^3",
-    "webpack5": "./test/webpack5"
+    "webpack5": "./test/webpack5",
+    "xaa": "^1.2.2"
   },
   "nyc": {
     "all": true,
@@ -73,5 +75,8 @@
   },
   "engines": {
     "node": ">=6"
+  },
+  "prettier": {
+    "printWidth": 100
   }
 }

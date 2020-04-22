@@ -11,6 +11,8 @@ const deepExtend = require("deep-extend");
 const fetchUrl = require("fetch").fetchUrl;
 const Pkg = require("../../package.json");
 const Config = require("../../lib/config");
+const xaa = require("xaa");
+const { asyncVerify, runDefer, runFinally, runTimeout } = require("run-verify");
 
 const expect = chai.expect;
 
@@ -47,6 +49,7 @@ module.exports = function isomorphicDevSpec({
     }
 
     function cleanup() {
+      delete process.send;
       try {
         rimraf.sync(Path.resolve("test/dist"));
         writeFont();
@@ -92,7 +95,7 @@ module.exports = function isomorphicDevSpec({
         webpackDevServer.close();
         webpackDevServer.listeningApp.close(function() {
           webpackDevServer = undefined;
-          callback();
+          setTimeout(callback, 200);
         });
       } else {
         callback();
@@ -104,15 +107,17 @@ module.exports = function isomorphicDevSpec({
     const origLog = Object.assign({}, logger);
     let logs = [];
 
-    beforeEach(function() {
+    beforeEach(function(done) {
       cleanup();
       Config.verbose = true;
       Config.reloadDelay = 10;
       logs = [];
       logger.log = function() {
-        logs.push(Array.prototype.slice.apply(arguments).join(" "));
+        const msg = Array.prototype.slice.apply(arguments).join(" ");
+        logs.push(msg);
       };
       logger.error = logger.log;
+      done();
     });
 
     afterEach(function(done) {
@@ -171,7 +176,10 @@ module.exports = function isomorphicDevSpec({
       const logsIx = logs.length;
 
       const newName = Path.resolve(".iso-config.json");
-      const renames = [{ src: configFile, dst: newName }, { src: newName, dst: configFile }];
+      const renames = [
+        { src: configFile, dst: newName },
+        { src: newName, dst: configFile }
+      ];
 
       const check = function() {
         const found = logs
@@ -234,18 +242,18 @@ module.exports = function isomorphicDevSpec({
       logger.error("test logger.error");
     });
 
-    it(`should start and watch for file change event @${tag}`, function(done) {
-      testWebpackDevServer(clone(webpackConfig), () => {
-        verifyRenameEvent(() => {
-          setTimeout(() => {
-            extendRequire.deactivate();
-            stopWebpackDevServer(done);
-          }, 10);
-        });
-      });
+    it(`should start and watch for file change event @${tag}`, function() {
+      return asyncVerify(
+        next => testWebpackDevServer(clone(webpackConfig), next),
+        next => verifyRenameEvent(next),
+        runFinally(() => {
+          extendRequire.deactivate();
+          return new Promise(resolve => stopWebpackDevServer(resolve));
+        })
+      );
     });
 
-    function testAddUrl(publicPath, skipSetEnv, done) {
+    function testAddUrl(publicPath, skipSetEnv) {
       const wpConfig = clone(webpackConfig);
       wpConfig.output.publicPath = publicPath;
       wpConfig.plugins = [
@@ -253,34 +261,56 @@ module.exports = function isomorphicDevSpec({
           webpackDev: { url: "http://localhost:8080", addUrl: true, skipSetEnv }
         })
       ];
-      testWebpackDevServer(wpConfig, () => {
-        const ttf = "../client/fonts/font.ttf";
-        const fontFullPath = require.resolve(ttf);
-        delete require.cache[fontFullPath];
-        const font = require(ttf);
-        expect(font).to.equal(`http://localhost:8080/test/${changedFontHash}`);
-        delete require.cache[fontFullPath];
-        const env = skipSetEnv ? (!!process.env.WEBPACK_DEV).toString() : process.env.WEBPACK_DEV;
-        expect(env).to.equal((!skipSetEnv).toString());
-        setTimeout(() => {
-          verifySkipReload(() => {
-            setTimeout(() => {
-              extendRequire.deactivate();
-              stopWebpackDevServer(done);
-            }, 10);
-          });
-        }, 50);
-      });
+      return asyncVerify(
+        next => testWebpackDevServer(wpConfig, next),
+        () => {
+          const ttf = "../client/fonts/font.ttf";
+          const fontFullPath = require.resolve(ttf);
+          delete require.cache[fontFullPath];
+          const font = require(ttf);
+          expect(font).to.equal(`http://localhost:8080/test/${changedFontHash}`);
+          delete require.cache[fontFullPath];
+          const env = skipSetEnv ? (!!process.env.WEBPACK_DEV).toString() : process.env.WEBPACK_DEV;
+          expect(env).to.equal((!skipSetEnv).toString());
+        },
+        () => xaa.delay(50),
+        next => verifySkipReload(next),
+        runFinally(() => {
+          extendRequire.deactivate();
+          return new Promise(resolve => stopWebpackDevServer(resolve));
+        })
+      );
     }
 
-    it(`should start and add webpack dev server URL @${tag}`, function(done) {
+    it(`should start and add webpack dev server URL @${tag}`, function() {
       delete process.env.WEBPACK_DEV;
-      testAddUrl("/test/", true, done);
+      return testAddUrl("/test/", true);
     });
 
-    it(`should start and add webpack dev server URL and / @${tag}`, function(done) {
+    it(`should start and add webpack dev server URL and / @${tag}`, function() {
       delete process.env.WEBPACK_DEV;
-      testAddUrl("test/", false, done);
+      return testAddUrl("test/", false);
+    });
+
+    it(`should use process.send @${tag}`, () => {
+      const defer = runDefer();
+      process.send = defer.resolve;
+
+      const wpConfig = clone(webpackConfig);
+      wpConfig.output.publicPath = "test/";
+      wpConfig.plugins = [
+        new IsomorphicLoaderPlugin({
+          webpackDev: { url: "http://localhost:8080", addUrl: true, skipSetEnv: true }
+        })
+      ];
+
+      return asyncVerify(
+        runTimeout(3000),
+        next => start(wpConfig, devConfig, next),
+        defer.wait(),
+        r => expect(r).has.property("name", "isomorphic-loader-config"),
+        runFinally(() => new Promise(resolve => stopWebpackDevServer(resolve)))
+      );
     });
 
     const mockConfig = {
@@ -310,47 +340,49 @@ module.exports = function isomorphicDevSpec({
       assetsFile: "/isomorphic-assets.json"
     };
 
-    const waitLog = (msg, callback) => {
+    const waitLog = (msg, defer) => {
       const logsIx = logs.length;
       const check = () => {
         if (logs.slice(logsIx).find(x => x.indexOf(msg) >= 0)) {
-          callback();
-        } else {
+          defer.resolve();
+        } else if (defer.pending()) {
           setTimeout(check, 10);
         }
       };
       check();
     };
 
-    it(`should wait for valid config @${tag}`, done => {
+    it(`should wait for valid config @${tag}`, () => {
       const config = clone(mockConfig);
-      fs.writeFile(configFile, JSON.stringify(config, null, 2), () => {
-        extendRequire({}, err => {
-          if (err) return done(err);
+      const defer = runDefer();
+      return asyncVerify(
+        next => fs.writeFile(configFile, JSON.stringify(config, null, 2), next),
+        next => extendRequire({}, next),
+        next => {
           expect(logs).contains(
             " > isomorphic-loader extend require: config is now VALID - webpack dev server mode < "
           );
           config.valid = false;
-
-          return fs.writeFile(configFile, JSON.stringify(config, null, 2), () => {
-            waitLog("watching for valid change", () => {
-              config.valid = true;
-              fs.writeFile(configFile, JSON.stringify(config, null, 2), () => {
-                waitLog("config is now VALID - webpack dev server mode", done);
-              });
-            });
-          });
-        });
-      });
+          waitLog("watching for valid change", defer);
+          return fs.writeFile(configFile, JSON.stringify(config, null, 2), next);
+        },
+        defer.wait(1000),
+        next => {
+          defer.clear();
+          config.valid = true;
+          waitLog("config is now VALID - webpack dev server mode", defer);
+          fs.writeFile(configFile, JSON.stringify(config, null, 2), next);
+        },
+        defer.wait(1000)
+      );
     });
 
-    it(`should handle invalid JSON in config file @${tag}`, done => {
-      fs.writeFile(configFile, JSON.stringify(mockConfig, null, 2), () => {
-        extendRequire({}, err => {
-          if (err) return done(err);
-          return verifyBadConfig(done);
-        });
-      });
+    it(`should handle invalid JSON in config file @${tag}`, () => {
+      return asyncVerify(
+        next => fs.writeFile(configFile, JSON.stringify(mockConfig, null, 2), next),
+        next => extendRequire({}, next),
+        next => verifyBadConfig(next)
+      );
     });
   });
 };
