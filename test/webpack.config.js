@@ -16,11 +16,11 @@ module.exports = {
     rules: [
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
-        use: [{ loader: "electrode-cdn-file-loader", options: { limit: 10000 } }, "../.."]
+        loader: "file-loader!../.."
       },
       {
         test: /\.(ttf|eot)$/,
-        use: [{ loader: "electrode-cdn-file-loader", options: { limit: 10000 } }, "../.."]
+        loader: "file-loader!../.."
       }
     ]
   }

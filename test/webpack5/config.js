@@ -1,6 +1,6 @@
 "use strict";
 
-const IsomorphicLoaderPlugin = require("../lib/webpack-plugin");
+const IsomorphicLoaderPlugin = require("../../lib/webpack-plugin");
 const Path = require("path");
 
 module.exports = {
