@@ -3,6 +3,7 @@
 const sinon = require("sinon");
 const Pkg = require("../../package.json");
 
+const Config = require("../../lib/config");
 const logger = require("../../lib/logger");
 const extendRequire = require("../../lib/extend-require");
 const { asyncVerify, expectError } = require("run-verify");
@@ -57,10 +58,13 @@ describe("extend-require using process send event", function() {
     process.env.NODE_ENV = "production";
     process.send = () => {};
     sandbox.stub(extendRequire._instance, "waitingNotice").returns(false);
-    return asyncVerify(expectError(next => extendRequire({}, next)), r => {
-      expect(r).to.be.an("Error");
-      expect(r.message).contains("config not found");
-    });
+    return asyncVerify(
+      expectError(next => extendRequire({}, next)),
+      r => {
+        expect(r).to.be.an("Error");
+        expect(r.message).contains("config not found");
+      }
+    );
   });
 
   it("should listen for config event messages", () => {
@@ -81,17 +85,17 @@ describe("extend-require using process send event", function() {
       next => extendRequire({}, next),
       () => {
         expect(handler).to.be.a("function");
-        handler({ name: "isomorphic-loader-config", config: "abc" });
+        handler({ name: Config.configName, config: "abc" });
         expect(logs[0].join(" ")).contains("SyntaxError");
         logs = [];
-        handler({ name: "isomorphic-loader-config", config: JSON.stringify(mockConfig) });
+        handler({ name: Config.configName, config: JSON.stringify(mockConfig) });
         expect(logs[0].join(" ")).contains("config is now VALID");
         const invalidConfig = Object.assign({}, mockConfig, { valid: false });
         logs = [];
-        handler({ name: "isomorphic-loader-config", config: JSON.stringify(invalidConfig) });
+        handler({ name: Config.configName, config: JSON.stringify(invalidConfig) });
         expect(logs[0].join(" ")).contains("config is INVALID");
         logs = [];
-        handler({ name: "isomorphic-loader-config", config: JSON.stringify(mockConfig) });
+        handler({ name: Config.configName, config: JSON.stringify(mockConfig) });
         expect(logs[0].join(" ")).contains("config is now VALID");
       },
       () => {
