@@ -308,7 +308,7 @@ module.exports = function isomorphicDevSpec({
         runTimeout(3000),
         next => start(wpConfig, devConfig, next),
         defer.wait(),
-        r => expect(r).has.property("name", "isomorphic-loader-config"),
+        r => expect(r).has.property("name", Config.configName),
         runFinally(() => new Promise(resolve => stopWebpackDevServer(resolve)))
       );
     });

@@ -93,7 +93,7 @@ _book
 *.pdf
 
 test/dist
-.isomorphic-loader-config*
+.isomorphic-loader*
 .nyc_output
 .vscode
 *-lock.*
