@@ -106,4 +106,64 @@ describe("extend-require using process send event", function() {
       }
     );
   });
+
+  describe("extend-require using cdnUrlMapping", function() {
+    let sandbox;
+    beforeEach(() => {
+      sandbox = sinon.createSandbox();
+    });
+
+    afterEach(() => {
+      delete process.send;
+      delete process.env.NODE_ENV;
+      extendRequire.reset();
+      extendRequire.reset();
+      sandbox.restore();
+    });
+
+    after(() => {
+      delete require.cache[require.resolve("../../lib/extend-require")];
+    });
+
+    const mockConfig2 = {
+      valid: true,
+      version: Pkg.version,
+      timestamp: Date.now(),
+      context: "test/client",
+      output: {
+        path: "/",
+        filename: "bundle.js",
+        publicPath: "test/"
+      },
+      assets: {
+        marked: {
+          // "test/client/fonts/font.ttf": "1e2bf10d5113abdb2ca03d0d0f4f7dd1.ttf"
+          "test/client/fonts/font.ttf": "1e2bf10d5113abdb2ca03d0d0f4f7mm1.ttf"
+        },
+        chunks: {
+          main: "bundle.js"
+        }
+      },
+      cdnUrlMapping: {
+        "1e2bf10d5113abdb2ca03d0d0f4f7mm1":
+          "http://cdnlocalhost.com/1e2bf10d5113abdb2ca03d0d0f4f7mm1.ttf"
+      },
+      webpackDev: {
+        skipSetEnv: false,
+        url: "http://localhost:8080",
+        addUrl: true
+      },
+      isWebpackDev: true,
+      assetsFile: "/isomorphic-assets.json"
+    };
+
+    it("should replace url with cdnUrlMapping", () => {
+      process.env.NODE_ENV = "production";
+      let handler;
+      process.send = () => {};
+      sandbox.stub(process, "on").callsFake((e, h) => {
+        handler = h;
+      });
+    });
+  });
 });
