@@ -75,6 +75,10 @@ describe("extend-require using process send event", function() {
     });
 
     let logs = [];
+    sandbox.stub(logger, "error").callsFake((...args) => {
+      logs.push(args);
+    });
+
     sandbox.stub(logger, "log").callsFake((...args) => {
       logs.push(args);
     });
