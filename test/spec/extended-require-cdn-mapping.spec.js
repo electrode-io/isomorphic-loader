@@ -6,6 +6,11 @@ describe("cdnMapping", () => {
             cdnUrlMappingFile: "test/client/cdnMapping.json"
         }, "index.js");
         expect(assetUrl).to.equal("http://cdn.localhost.com/index.js");
+
+        const assetUrl2 = _checkCdnMapping({
+            cdnUrlMappingFile: "test/client/cdnMapping.json"
+        }, "index.js");
+        expect(assetUrl2).to.equal("http://cdn.localhost.com/index.js");
     });
 
     it("or return original asset filename", () => {
