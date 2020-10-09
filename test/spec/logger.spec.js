@@ -2,7 +2,6 @@
 
 const logger = require("../../lib/logger");
 const xstdout = require("xstdout");
-const extendRequire = require("../../lib/extend-require");
 
 describe("logger", function() {
   after(() => {
@@ -32,7 +31,7 @@ describe("logger", function() {
     const a = intercept.stdout.join("").trim() + intercept.stderr.join("").trim();
     intercept.stdout.splice(0, intercept.stdout.length);
     intercept.stderr.splice(0, intercept.stderr.length);
-    extendRequire.setLogLevel("error");
+    logger.setLevel("error");
     logger.log("oops");
     logger.error("error");
     logger.setLevel("none");

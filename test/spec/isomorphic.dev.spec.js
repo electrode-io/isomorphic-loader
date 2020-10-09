@@ -15,7 +15,7 @@ Object.keys(webpackInfo).forEach(ver => {
   require("../lib/isomorphic.dev.spec")({
     title: `isomorphic extend with webpack ${ver} & webpack-dev-server`,
     tag: `webpack_${ver}`,
-    timeout: 20000,
+    timeout: 10000,
     webpack,
     WebpackDevServer,
     webpackConfig
