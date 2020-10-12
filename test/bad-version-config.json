@@ -1,0 +1,11 @@
+{
+  "valid": true,
+  "version": "3.0.1",
+  "timestamp": 1602539652450,
+  "context": "src",
+  "output": {
+    "path": "dist/js",
+    "filename": "[name].bundle.[contenthash].js",
+    "publicPath": "/js/"
+  }
+}

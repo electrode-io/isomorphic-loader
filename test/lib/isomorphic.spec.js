@@ -229,6 +229,17 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     );
   });
 
+  it(`should fail if loadAssets got a config file with a mismatched version @${tag}`, () => {
+    return asyncVerify(
+      expectError(() => {
+        extendRequire().loadAssets("test/bad-version-config.json");
+      }),
+      error => {
+        expect(error.message).includes("is different from config version 3.0.1");
+      }
+    );
+  });
+
   it(`should help maintain a global extend require intance`, () => {
     setXRequire("blah");
     expect(getXRequire()).equal("blah");
