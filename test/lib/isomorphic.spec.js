@@ -240,6 +240,19 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
     );
   });
 
+  it(`extendRequire should avoid loading assets if WEBPACK_DEV env exist`, () => {
+    process.env.WEBPACK_DEV = true;
+    return asyncVerify(
+      () => {
+        // should not fail due to reading bad config file
+        extendRequire({ assetsFile: "test/bad-version-config.json" });
+      },
+      runFinally(() => {
+        delete process.env.WEBPACK_DEV;
+      })
+    );
+  });
+
   it(`should help maintain a global extend require intance`, () => {
     setXRequire("blah");
     expect(getXRequire()).equal("blah");
