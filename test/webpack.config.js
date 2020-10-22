@@ -23,5 +23,10 @@ module.exports = {
         use: [{ loader: "electrode-cdn-file-loader", options: { limit: 10000 } }, "../.."]
       }
     ]
+  },
+  resolve: {
+    alias: {
+      smiley2Jpg: Path.join(__dirname, "./nm/smiley2.jpg")
+    }
   }
 };

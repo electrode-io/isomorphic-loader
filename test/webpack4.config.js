@@ -23,5 +23,10 @@ module.exports = {
         loader: "file-loader!../.."
       }
     ]
+  },
+  resolve: {
+    alias: {
+      smiley2Jpg: Path.join(__dirname, "./nm/smiley2.jpg")
+    }
   }
 };
