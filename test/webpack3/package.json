@@ -1,0 +1,12 @@
+{
+  "name": "webpack3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "webpack": "^3",
+    "webpack-dev-server": "^2"
+  },
+  "private": true
+}
