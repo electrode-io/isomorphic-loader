@@ -87,10 +87,16 @@ module.exports = function isomorphicExtend({ tag, webpack, webpackConfig }) {
             "test/client/images/smiley.png": "f958aee9742689b14418e8efef2b4032.png",
             "test/client/data/foo.bin": "71f74d0894d9ce89e22c678f0d8778b2.bin",
             "test/client/fonts/font.ttf": "1fb0e331c05a52d5eb847d6fc018320d.ttf",
-            "test/nm/smiley2.jpg": "2029f1bb8dd109eb06f59157de62b529.jpg"
+            "test/nm/smiley2.jpg": "2029f1bb8dd109eb06f59157de62b529.jpg",
+            "test/nm/demo.css": {
+              "demo": "demo__demo"
+            }
           },
           chunks: {
-            main: "bundle.js"
+            main: [
+              "main.style.css",
+              "bundle.js"
+            ]
           }
         }
       };

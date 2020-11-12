@@ -158,6 +158,33 @@ describe("extend-require", function() {
     );
   });
 
+  it("should return object for css", () => {
+    const extendRequire = new ExtendRequire({});
+
+    return asyncVerify(
+      () => {
+        extendRequire.initialize({
+          version: Pkg.version,
+          assets: {
+            marked: {
+              "test/nm/demo.css": { "demo": "abc" }
+            }
+          },
+          output: {
+            publicPath: "/blah/"
+          }
+        });
+      },
+      () => require("../nm/demo.css"),
+      assetUrl => {
+        expect(assetUrl).deep.equals({ "demo": "abc" });
+      },
+      runFinally(() => {
+        extendRequire.reset();
+      })
+    );
+  });
+
   it("should be ok to reset before initializing", () => {
     const extendRequire = new ExtendRequire();
     extendRequire.reset();

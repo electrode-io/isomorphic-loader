@@ -51,4 +51,11 @@ describe("utils", function() {
       expect(utils.removeCwd(Path.resolve("test"))).to.equal("test");
     });
   });
+
+  describe("requireFromString", function() {
+    it("should load module from string", () => {
+      const result = utils.requireFromString("module.exports = { test: 'abc'}");
+      expect(result).to.deep.equal({ test: "abc" });
+    });
+  });
 });

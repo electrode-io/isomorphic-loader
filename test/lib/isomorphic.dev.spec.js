@@ -15,6 +15,7 @@ const { asyncVerify, runFinally } = require("run-verify");
 const expect = chai.expect;
 
 const { extendRequire, IsomorphicLoaderPlugin } = require("../..");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = function isomorphicDevSpec({
   title,
@@ -40,11 +41,19 @@ module.exports = function isomorphicDevSpec({
       );
     }
 
+    function writeCss(data) {
+      fs.writeFileSync(
+        Path.resolve("test/nm/demo.css"),
+        data || ".demo1 { background-color: greenyellow; }"
+      );
+    }
+
     function cleanup() {
       delete process.send;
       try {
         rimraf.sync(Path.resolve("test/dist"));
         writeFont();
+        writeCss();
       } catch (e) {
         //
       }
@@ -113,6 +122,7 @@ module.exports = function isomorphicDevSpec({
     });
 
     const fontFile = "test/client/fonts/font.ttf";
+    const cssFile = "test/nm/demo.css";
 
     function verifyRemoteAssets(fontHash, callback) {
       fetchUrl("http://localhost:8080/test/isomorphic-assets.json", function(err, meta, body) {
@@ -120,6 +130,7 @@ module.exports = function isomorphicDevSpec({
         expect(meta.status).to.equal(200);
         const isomorphicData = JSON.parse(body.toString());
         expect(isomorphicData.assets.marked[fontFile]).to.equal(fontHash);
+        expect(isomorphicData.assets.marked[cssFile]).to.deep.equal({ "demo1": "demo__demo1" });
         return callback();
       });
     }
@@ -132,17 +143,20 @@ module.exports = function isomorphicDevSpec({
         isomorphicRequire.initialize(data.config);
       });
 
-      function verifyFontChange(callback) {
+      function verifyAssetChanges(callback) {
         const oldHash = isomorphicConfig.assets.marked[fontFile];
         expect(oldHash).to.be.a("string").that.is.not.empty;
         writeFont("testtesttest"); // font.ttf md5 1fb0e331c05a52d5eb847d6fc018320d
+        writeCss(".demo { background-color: greenyellow; }");
 
         const startTime = Date.now();
         function check() {
           const newHash = isomorphicConfig.assets.marked[fontFile];
+          const newMap = isomorphicConfig.assets.marked[cssFile];
           if (newHash && newHash !== oldHash) {
             expect(newHash).to.be.a("string").that.is.not.empty;
             expect(newHash).contains("1fb0e331c05a52d5eb847d6fc018320d");
+            expect(newMap).to.deep.equal({ "demo": "demo__demo" });
             callback();
           } else if (Date.now() - startTime > 5000) {
             callback(new Error("waiting for font change valid message timeout"));
@@ -159,7 +173,7 @@ module.exports = function isomorphicDevSpec({
         () => expect(isomorphicRequire.isWebpackDev()).to.equal(true),
         next => verifyRemoteAssets(defaultFontHash, next),
         () => xaa.delay(25),
-        next => verifyFontChange(next),
+        next => verifyAssetChanges(next),
         runFinally(() => {
           plugin.removeAllListeners();
         })
@@ -174,7 +188,7 @@ module.exports = function isomorphicDevSpec({
         webpackDev: { url: "http://localhost:8080", addUrl: true }
       });
 
-      wpConfig.plugins = [plugin];
+      wpConfig.plugins = [plugin, new MiniCssExtractPlugin({ filename: "[name].style.css" })];
 
       return asyncVerify(
         () => testWebpackDevServer(wpConfig, plugin),
