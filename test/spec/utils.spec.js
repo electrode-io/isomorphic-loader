@@ -66,10 +66,14 @@ describe("utils", function() {
       );
     });
 
-    it("should return default path if dir doesn't contain name", () => {
+    it("should return up to 4 parts path if dir doesn't contain name", () => {
       expect(utils.getMyNodeModulesPath("/test/node_modules/123456789/lib")).equals(
-        "isomorphic-loader/lib"
+        "test/node_modules/123456789/lib"
       );
+      expect(utils.getMyNodeModulesPath("/foo/blah/test/node_modules/123456789/lib")).equals(
+        "test/node_modules/123456789/lib"
+      );
+      expect(utils.getMyNodeModulesPath("/foo/123456789/lib")).equals("/foo/123456789/lib");
     });
 
     it("should find path with extras between name", () => {
