@@ -167,7 +167,7 @@ describe("extend-require", function() {
           version: Pkg.version,
           assets: {
             marked: {
-              "test/nm/demo.css": { "demo": "abc" }
+              "test/nm/demo.css": { demo: "abc" }
             }
           },
           output: {
@@ -177,7 +177,27 @@ describe("extend-require", function() {
       },
       () => require("../nm/demo.css"),
       assetUrl => {
-        expect(assetUrl).deep.equals({ "demo": "abc" });
+        expect(assetUrl).deep.equals({ demo: "abc" });
+      },
+      runFinally(() => {
+        extendRequire.reset();
+      })
+    );
+  });
+
+  it("should intercept by extensions", () => {
+    const extendRequire = new ExtendRequire({
+      interceptByExts: ".css"
+    });
+
+    return asyncVerify(
+      () => require("blah.css"),
+      asset => {
+        expect(asset).deep.equals({});
+      },
+      expectError(() => require("blah.jpg")),
+      error => {
+        expect(error.message).contains("Cannot find module 'blah.jpg");
       },
       runFinally(() => {
         extendRequire.reset();
