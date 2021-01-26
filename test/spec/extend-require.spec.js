@@ -187,7 +187,7 @@ describe("extend-require", function() {
 
   it("should intercept by extensions", () => {
     const extendRequire = new ExtendRequire({
-      interceptByExts: ".css"
+      ignoreExtensions: ".css"
     });
 
     return asyncVerify(
